@@ -42,6 +42,7 @@ enum DemoLibraryCatalog {
         var lyricURLs = Set<URL>()
         for root in roots {
             let root = root.standardizedFileURL
+            let lyricCountBeforeRoot = lyricURLs.count
             if root.lastPathComponent.caseInsensitiveCompare("Tracks") == .orderedSame {
                 collectTrackDirectory(at: root, into: &lyricURLs)
             } else {
@@ -57,7 +58,7 @@ enum DemoLibraryCatalog {
             // A caller may point at a parent directory containing several
             // library roots. Recursively inspect only explicitly supplied
             // roots and only collect directories named `Tracks`.
-            if lyricURLs.isEmpty, let enumerator = FileManager.default.enumerator(
+            if lyricURLs.count == lyricCountBeforeRoot, let enumerator = FileManager.default.enumerator(
                 at: root,
                 includingPropertiesForKeys: [.isDirectoryKey],
                 options: [.skipsHiddenFiles, .skipsPackageDescendants]
