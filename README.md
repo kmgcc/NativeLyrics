@@ -22,7 +22,7 @@ state; it does not patch layers or DOM details.
 ## Requirements
 
 - macOS 15 or later
-- Swift 6.2 toolchain or a newer compatible toolchain
+- Swift 6.1 toolchain or a newer compatible toolchain
 - AppKit for the renderer; SwiftUI is optional through `NativeLyricsSwiftUI`
 
 ## Swift Package Manager
@@ -31,7 +31,7 @@ Add the package dependency:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/kmgcc/NativeLyrics.git", from: "0.1.0")
+    .package(url: "https://github.com/kmgcc/NativeLyrics.git", from: "0.1.1")
 ]
 ```
 
