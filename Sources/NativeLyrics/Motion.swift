@@ -408,6 +408,12 @@ func interludeSample(elapsed: Double, duration: Double, profile: LyricsProfile) 
     }
     if remaining < 0.375 { opacity *= Curves.clamp(remaining/0.375) }
     let d = duration-0.75
-    let walk = (0..<3).map { i in d > 0 ? max(0.25,min(1,(elapsed-Double(i)*d/3)*3/d*0.75)) : 0.25 }
+    let walk: [Double] = (0..<3).map { i in
+        guard d > 0 else { return 0.25 }
+        let indexOffset = Double(i) * d / 3
+        let normalized = (elapsed - indexOffset) * 3 / d
+        let candidate = normalized * 0.75
+        return max(0.25, min(1, candidate))
+    }
     return .init(scale:max(0,scale)*0.7,opacity:opacity,walk:walk)
 }
