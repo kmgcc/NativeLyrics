@@ -321,7 +321,7 @@ public struct LyricsConfiguration: Equatable, Sendable {
     /// semantics.
     public var renderScale: Double = 1
     /// Zero follows the display's native cadence; otherwise the display link
-    /// is capped to this rate, matching APP fpsCap semantics.
+    /// is capped to this rate, matching host display-link cap semantics.
     public var fpsCap: Int = 0
     public init() {}
 

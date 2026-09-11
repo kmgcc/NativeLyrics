@@ -31,7 +31,7 @@ Add the package dependency:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/kmgcc/NativeLyrics.git", from: "0.1.2")
+    .package(url: "https://github.com/kmgcc/NativeLyrics.git", from: "0.1.3")
 ]
 ```
 
