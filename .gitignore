@@ -1,0 +1,7 @@
+.build/
+.swiftpm/
+.local/
+dist/
+output/
+.codex/
+.DS_Store

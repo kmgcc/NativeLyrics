@@ -1,0 +1,18 @@
+name: macOS Swift Package
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  package:
+    runs-on: macos-15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Validate package manifest
+        run: swift package dump-package >/dev/null
+      - name: Build all products
+        run: swift build --configuration debug
+      - name: Run tests
+        run: swift test --configuration debug
