@@ -1,35 +1,25 @@
 # MelismaKit
 
-![MelismaKit rendering a duet: ruby, romanization, translations, and word-by-word highlight](Documentation/images/hero.png)
+![MelismaKit 渲染对唱歌词：包含注音（Ruby）、罗马音、翻译以及逐字高亮效果](Documentation/images/hero.png)
 
-`MelismaKit` is a native macOS lyric renderer built with AppKit, Core Text,
-Core Animation, and Core Image. It accepts AMLL-compatible TTML directly and
-keeps media timing in seconds; the host supplies playback state and remains the
-owner of the audio player.
+`MelismaKit` 是一个专为 macOS 打造的原生歌词渲染组件，基于 AppKit、Core Text、Core Animation 与 Core Image 构建。它直接支持与 AMLL 兼容的 TTML 歌词格式，并以秒为单位维护媒体计时；宿主应用仅需提供播放状态，并继续持有音频播放器的完整控制权。
 
-The package is split into two products:
+本软件包分为两个产物（Products）：
 
-- `MelismaKit` contains the renderer, TTML decoder, timeline, layout, motion,
-  interaction, and value models.
-- `MelismaKitSwiftUI` contains one small `NSViewRepresentable` bridge. It
-  mounts a host-owned `LyricsView` and does not mirror renderer state or create
-  a second controller hierarchy.
+- `MelismaKit`：包含核心渲染器、TTML 解码器、时间线、布局引擎、动效系统、交互逻辑以及数据值模型。
+- `MelismaKitSwiftUI`：包含一个轻量级的 `NSViewRepresentable` 桥接封装。用于挂载宿主持有的 `LyricsView`，不会镜像内部渲染状态，亦不创建第二套控制器层级。
 
-Appearance and behavior belong to the component. `LyricsConfiguration` exposes
-typography, palette, alignment, translation/Ruby/romanization, highlight and
-obscenity modes, cover-blur channels, compositing, raster quality, display-link
-cap, and motion controls. The host only supplies its semantic inputs and media
-state; it does not patch layers or DOM details.
+外观样式与渲染行为完全由组件内部自持。`LyricsConfiguration` 提供了对排版字体、调色板、对齐方式、翻译/Ruby注音/罗马音、逐字高亮与脏话过滤模式、封面模糊通道、图层混合模式、栅格化渲染质量、DisplayLink 帧率上限以及动效参数的完整控制。宿主应用只需传入语义化配置和播放状态，无需直接侵入图层树或处理 DOM 细节。
 
-## Requirements
+## 系统要求
 
-- macOS 15 or later
-- Swift 6.1 toolchain or a newer compatible toolchain
-- AppKit for the renderer; SwiftUI is optional through `MelismaKitSwiftUI`
+- macOS 15 或更高版本
+- Swift 6.1 或更高版本的兼容工具链
+- 渲染器核心依赖 AppKit；SwiftUI 支持为可选依赖（通过 `MelismaKitSwiftUI`）
 
 ## Swift Package Manager
 
-Add the package dependency:
+添加软件包依赖：
 
 ```swift
 dependencies: [
@@ -37,7 +27,7 @@ dependencies: [
 ]
 ```
 
-Then link the products required by the target:
+然后在目标 Target 中链接所需产物：
 
 ```swift
 dependencies: [
@@ -46,10 +36,9 @@ dependencies: [
 ]
 ```
 
-## Minimal AppKit integration
+## 最简 AppKit 接入
 
-`LyricsView` is the component boundary. A host creates it on the main actor,
-loads TTML bytes, sends playback samples, and handles lyric-click seeks:
+`LyricsView` 是该组件的对外边界。宿主在主线程（MainActor）上创建实例、加载 TTML 字节数据、同步播放采样，并处理歌词点击 Seek：
 
 ```swift
 import MelismaKit
@@ -60,7 +49,7 @@ final class LyricsController {
 
     init() {
         view.onSeek = { sourceTime in
-            // Ask the host audio player to seek to sourceTime.
+            // 通知宿主音频播放器跳转（Seek）到 sourceTime
         }
     }
 
@@ -74,7 +63,7 @@ final class LyricsController {
 }
 ```
 
-Configure the component directly when the host needs a different presentation:
+当宿主需要自定义呈现样式时，直接配置该组件：
 
 ```swift
 var configuration = LyricsConfiguration()
@@ -85,9 +74,7 @@ configuration.palette.mainActive = LyricsColor(0.95, 0.98, 1.0)
 lyricsController.view.configuration = configuration
 ```
 
-For a background import path, decode away from the UI executor and install the
-already parsed value on the main actor. `load(ttml:)` remains available and
-unchanged for synchronous callers:
+对于后台导入场景，可在 UI 线程之外完成解码，再将已解析的 Document 对象安装到主线程的视图中。同步调用方的 `load(ttml:)` 依然可用且行为保持不变：
 
 ```swift
 @MainActor
@@ -97,9 +84,9 @@ func loadInBackground(_ data: Data, into view: LyricsView) async throws {
 }
 ```
 
-## SwiftUI integration
+## SwiftUI 接入
 
-The SwiftUI product intentionally keeps ownership explicit:
+SwiftUI 产物有意保持职责归属明确：
 
 ```swift
 import MelismaKit
@@ -115,100 +102,65 @@ struct LyricsPanel: View {
 }
 ```
 
-Keep the `LyricsView` in the host's state/controller lifetime. SwiftUI may
-recreate the representable value, but the AppKit view remains the single source
-of truth for rendering and interaction.
+请在宿主的状态或控制器生命周期中持有 `LyricsView`。尽管 SwiftUI 可能会频繁重建 Representable 结构体值，底层的 AppKit 视图依然是渲染和交互的唯一数据源（Single Source of Truth）。
 
-## Rendering features
+## 渲染特性
 
 | | |
 |---|---|
-| ![Word-by-word highlight](Documentation/images/word-highlight.png) | ![Ruby above the base text](Documentation/images/ruby.png) |
-| Word-by-word karaoke highlight on the active row | Ruby (furigana) above the base text, with romanization and translation layers |
-| ![Interlude dots in a gap between lines](Documentation/images/interlude-dots.png) | ![Emphasis and glow on sustained syllables](Documentation/images/glow.png) |
-| Interlude dots while no line is being sung | Emphasis, glow, and blur driven by per-word timing |
+| ![逐字高亮](Documentation/images/word-highlight.png) | ![主文本上方的 Ruby 注音](Documentation/images/ruby.png) |
+| 当前活跃行的逐字卡拉OK式扫亮效果 | 主文本上方的 Ruby 注音（振假名），并支持罗马音与歌词翻译图层 |
+| ![两行歌词之间的间奏点](Documentation/images/interlude-dots.png) | ![长音节处的重音发光](Documentation/images/glow.png) |
+| 无歌词演唱时的呼吸间奏跳动点 | 由逐字时间驱动的重音缩放（Emphasis）、发光（Glow）与动态模糊 |
 
-Every image is a deterministic render produced by `MelismaKitProbe` from the
-bundled fixtures, not a hand-taken screenshot. See
-[Demo and probe](#demo-and-probe) to regenerate them.
+上述所有图片均由 `MelismaKitProbe` 基于内置固件确定性渲染生成，而非手动截屏。重新生成方式见 [Demo 与探针工具](#demo-与探针工具)。
 
-## Demo and probe
+## Demo 与探针工具
 
-Run the AppKit Demo from the repository root:
+在仓库根目录下运行 AppKit Demo：
 
 ```sh
 swift run --quiet MelismaKitDemo
 swift run --quiet MelismaKitDemo --ttml /path/to/lyrics.ttml
 ```
 
-The Demo includes bundled TTML fixtures for word timing, line timing, glow,
-duet/Ruby, and background vocals. External files can be selected with the open
-panel. To inspect a directory-based catalog, pass one or more explicit roots;
-the Demo never reads an application-specific library registry:
+Demo 内置了覆盖逐字计时、逐行计时、发光动效、对唱/Ruby 注音以及伴唱人声的 TTML 测试固件。可以通过打开面板选择外部文件。若要检查基于文件夹的曲库目录，可显式传入一个或多个根目录；Demo 绝不会读取任何特定宿主应用的曲库注册表：
 
 ```sh
-swift run --quiet MelismaKitDemo --dump-catalog \
-  --library-root /path/to/Library
+swift run --quiet MelismaKitDemo --dump-catalog   --library-root /path/to/Library
 ```
 
-The catalog accepts a root containing `Tracks/<track>/lyrics.ttml`, a `Tracks`
-directory, or a single directory containing `lyrics.ttml`. Adjacent
-`meta.json` and audio files are optional.
+曲库扫描器支持包含 `Tracks/<track>/lyrics.ttml` 的根目录、`Tracks` 目录或直接包含 `lyrics.ttml` 的单曲目录。同目录下的 `meta.json` 与音频文件为可选项。
 
-For deterministic rendering measurements:
+进行确定性渲染基准测量：
 
 ```sh
-swift run --quiet MelismaKitProbe \
-  Sources/MelismaKitDemo/Resources/complex.ttml \
-  /tmp/melismakit-probe 10 760 720 --paused
+swift run --quiet MelismaKitProbe   Sources/MelismaKitDemo/Resources/complex.ttml   /tmp/melismakit-probe 10 760 720 --paused
 ```
 
-See [VALIDATION.md](VALIDATION.md) for the current test and manual-validation
-record, and [BEHAVIOR-REGRESSIONS.md](BEHAVIOR-REGRESSIONS.md) for the renderer
-contracts covered by regression tests.
+当前的测试与人工验证记录参见 [VALIDATION.md](VALIDATION.md)，回归测试所覆盖的渲染器契约参见 [BEHAVIOR-REGRESSIONS.md](BEHAVIOR-REGRESSIONS.md)。
 
-For where the project is going — and the phased plan for getting there — see
-[Documentation/ROADMAP.md](Documentation/ROADMAP.md).
+项目的未来演进方向及各阶段执行计划参见 [路线图 (Documentation/ROADMAP.md)](Documentation/ROADMAP.md)。
 
-## Architecture and compatibility
+## 架构与兼容性
 
-The core package has no dependency on a player application, track model,
-settings store, theme store, WebView, audio engine, or application bundle
-resources. It communicates with a host through value types, configuration, the
-`onSeek` callback, and playback samples passed to `synchronize`.
+核心软件包不依赖任何特定的播放器应用、曲目数据模型、设置存储、主题存储、WebView、音频引擎或应用 Bundle 资源。它完全通过值类型、配置对象、`onSeek` 回调以及传入 `synchronize` 的播放采样与宿主通信。
 
-`LyricsProfile.currentPlayer` is a compatibility preset for hosts that need the
-existing native timing behavior; `LyricsProfile.upstream` is the explicit
-upstream-style alternative. Both are implemented inside the component, so a
-host does not need a compatibility orchestration layer.
+`LyricsProfile.currentPlayer` 是为需要现有原生计时行为的宿主提供的兼容性预设；`LyricsProfile.upstream` 则是显式的上游风格预设。两者均在组件内部实现，宿主无需维护复杂的兼容协调层。
 
-More detail is in [Documentation/INTEGRATION.md](Documentation/INTEGRATION.md).
+更多接入细节详见 [接入指南 (Documentation/INTEGRATION.md)](Documentation/INTEGRATION.md)。
 
-## Relationship to AMLL
+## 与 AMLL 的关系
 
-[AMLL (Apple Music-like Lyrics)](https://github.com/steve-xmh/applemusic-like-lyrics)
-is a web implementation: TypeScript, a DOM layer tree, and a browser rendering
-path. MelismaKit is a native implementation for macOS built on AppKit, Core
-Text, and Core Animation. **It is not an official Swift port of AMLL and is not
-affiliated with or endorsed by the AMLL project.**
+[AMLL (Apple Music-like Lyrics)](https://github.com/steve-xmh/applemusic-like-lyrics) 是一个 Web 端实现：基于 TypeScript、DOM 图层树与浏览器渲染管线。MelismaKit 是专为 macOS 打造的原生实现，基于 AppKit、Core Text 与 Core Animation。**它并非 AMLL 的官方 Swift 移植版本，亦未隶属于 AMLL 项目或获得其背书。**
 
-The two share a format, not a codebase. MelismaKit parses the same TTML profile,
-so a file that renders in AMLL renders here. Its timing, layout, motion, and
-interaction behavior were developed to match AMLL's observable behavior — and
-for a number of functions, by reading AMLL's source rather than its
-documentation. Those functions are derived works:
+两者共享的是格式规范，而非代码库。MelismaKit 解析相同的 TTML 规范子集，因此能在 AMLL 中正常呈现的文件也能在此渲染。其计时、布局、动效和交互行为经过精心设计，以匹配 AMLL 的可观察行为 —— 并且有若干函数是通过直接阅读 AMLL 源码而非文档实现的。这些函数属于派生作品：
 
-- [`NOTICE`](NOTICE) records the AMLL attribution, the derived modules, and the
-  access date.
-- [`Documentation/PROVENANCE.md`](Documentation/PROVENANCE.md) lists, symbol by
-  symbol, which functions of each library source are derived, which are
-  independent, and which could not be determined.
+- [`NOTICE`](NOTICE) 记录了对 AMLL 的致谢归属、派生涉及的模块以及代码查阅日期。
+- [`Documentation/PROVENANCE.md`](Documentation/PROVENANCE.md) 逐个符号列出了各库源码文件中哪些函数属于派生、哪些属于独立原创，以及哪些尚无法完全确定。
 
-Both projects are licensed `AGPL-3.0-only`, so the licenses are compatible.
+两个项目均采用 `AGPL-3.0-only` 许可证，因此协议完全兼容。
 
-## License
+## 许可证
 
-This project is distributed under the GNU Affero General Public License,
-version 3, only (`AGPL-3.0-only`). See [LICENSE](LICENSE),
-[NOTICE](NOTICE), and
-[Documentation/LICENSING.md](Documentation/LICENSING.md).
+本项目仅在 GNU Affero 通用公共许可证第 3 版（`AGPL-3.0-only`）下分发。详见 [LICENSE](LICENSE)、[NOTICE](NOTICE) 以及 [Documentation/LICENSING.md](Documentation/LICENSING.md)。

@@ -1,34 +1,32 @@
-# MelismaKit behavior contracts — 2026-09-06
+# MelismaKit 行为契约 — 2026-09-06
 
-This records the native renderer's observable behavior contracts. The standalone
-package does not require a production WebView or a player application's source
-tree.
+本文档记录了原生渲染器的可观察行为契约。作为独立 Swift 软件包，它不需要生产环境的 WebView，也不依赖播放器宿主应用的源码树。
 
-## Root causes and contracts
+## 根本原因与契约
 
-| Symptom | Cause | Native contract |
+| 现象 | 原因 | 原生契约 |
 |---|---|---|
-| Historical rows stay sharp | `highlighted` is a retained timeline set, not the live singing set | Parallel foreground rows remain clear/highlighted until the whole group ends; ordinary sequential rows still fade |
-| Blur jumps / appears absent | Reassigning the same mutable CI filter could retain the compositor's old radius | Publish a copied filter state on every changed frame; tween radius over 450 ms, default 3–6 pt |
-| Hover behavior differs by playback state | Pointer state was not reconciled reliably and paused display links could stop before a deferred transition | Pointer inside and manual browsing clear all rows; the default starts blur immediately on pointer exit, while hosts can opt into a delay; pending deadlines keep paused updates alive |
-| Click causes overlap | Delay was proportional to distance from clicked row | Cascade from first visible row down at 55 ms per row, including rows above the clicked row; preserve each scheduled start while layout targets change |
-| Slider seek produces scattered motion | Every discontinuity used the same spring cascade | `synchronize(... seek: true, motion: .immediate)` snaps the entire stack and cancels queued springs; clicks explicitly request `.cascade` |
-| English/BG highlight stalls or jumps | Untimed spaces inherited the whole paragraph range; sorting mask points by time reordered spatial positions | Whitespace occupies adjacent word gaps; mask boundaries retain text order and clamp backwards times |
-| Slightly inverted word boundary | Real-world TTML can contain a small backwards word boundary | Renderer tolerates and clamps the boundary without editing source order |
-| Highlight smoothing lags | Exponential filter trailed an already predicted clock; forward glide stopped as soon as it led | Apply every media sample immediately; only bounded forward anticipation through authored gaps remains; paused/seek position stays exact |
-| Background floats around main | Independent slide, scale and discontinuous flow-height changes | One non-overshooting reveal tween owns flow height and BG scale; BG edge is attached to main's transformed edge with a fixed gap |
-| Emphasis/glow remain after exit | Media sample froze at the emphasis peak | Multiply emphasis displacement, scale delta and glow by the finite exit lifetime; zero lifetime restores identity |
-| Exit highlight never finishes | Catch-up used a visually truncated group end | Use actual word-mask end, including BG words; fork's 16 ms threshold and 120–280 ms catch-up duration; native default exit fade is 280 ms and begins immediately |
+| 历史歌词行保持清晰未模糊 | `highlighted` 维护的是保留的时间线集合，而非当前正在演唱的集合 | 并行前景行在整组结束前保持清晰/高亮；常规顺序行按预期淡出模糊 |
+| 模糊突变 / 似乎未生效 | 重复赋值同一个可变 CI 滤镜可能会保留合成器原有的旧模糊半径 | 每一帧状态变化时发布独立的滤镜状态拷贝；半径在 450 ms 内过渡插值，默认 3–6 pt |
+| 悬停行为因播放状态而异 | 指针状态未能可靠协调，且暂停状态下的 display link 可能在延迟过渡前停止刷新 | 指针进入及手动浏览会清除所有行的模糊；默认在指针移出时立即启动模糊过渡，宿主亦可配置延迟；存在待处理截止时间时保持暂停下的刷新循环激活 |
+| 点击导致歌词行重叠 | 延迟时间与距点击行的行距离成正比 | 从首个可见行向下以每行 55 ms 级联推进，包括点击行上方的行；在布局目标变化期间保留每个预定的启动时间 |
+| 进度条 Seek 产生混乱晃动 | 所有时间不连续跳变均使用了相同的弹簧级联动画 | `synchronize(... seek: true, motion: .immediate)` 瞬间定位整个图层栈并取消排队的弹簧动画；点击歌词则显式请求 `.cascade` 级联动画 |
+| 英文/伴唱高亮停滞或跳跃 | 未标记时间的空格继承了整段的范围；按时间对遮罩控制点排序打乱了空间位置 | 空格归入相邻单词的间隙；遮罩边界严格保持文本空间顺序，并对时间倒流进行截断约束（clamp） |
+| 单词时间边界轻微倒流 | 真实 TTML 文件中可能存在微小的单词时间倒流 | 渲染器容忍并截断该边界，不破坏原始文本顺序 |
+| 高亮平滑存在滞后感 | 指数平滑滤镜滞后于已预测的媒体时钟；前向滑动在领先后立即停止 | 立即应用每个媒体时间采样；仅在标注的歌词间隙内保留有界的前向预测（anticipation）；暂停/跳转定位保持绝对精准 |
+| 伴唱（背景行）浮动脱离主行 | 伴唱独立的滑动、缩放以及不连续的流动高度（flow-height）变化 | 由一个无过冲的展开补间（reveal tween）统一控制流动高度与伴唱缩放；伴唱边缘以固定间距贴合主行的变换边缘 |
+| 移出后重音/发光残留 | 媒体采样冻结在重音峰值处 | 将重音位移、缩放增量和发光强度乘以有限的移出生命周期；生命周期归零时彻底恢复恒等状态（identity） |
+| 退出高亮从未完成 | 补齐（catch-up）逻辑使用的是视觉上被截断的组结束时间 | 使用实际的单词遮罩结束时间（包括伴唱单词）；采用 fork 的 16 ms 阈值与 120–280 ms 补齐时长；原生默认退出淡出为 280 ms 且立即启动 |
 
-The forward gap anticipation is an intentional native product extension. The fork's `lyric-line.ts` explicitly emits static mask keyframes during authored gaps and avoids additional easing to protect word timing. It is not accurate to describe perpetual movement through every authored gap as exact upstream behavior. The native anticipation is bounded (default up to 1.44 pt and 8% of the next segment), and never trails the authored sweep.
+前向间隙预测（forward gap anticipation）是原生实现中有意设计的产品扩展。AMLL fork 的 `lyric-line.ts` 在标注的间隙内显式发出静态遮罩关键帧，并避免额外的缓动以保护单词计时。将穿过所有标注间隙的持续运动描述为上游完全一致的行为是不准确的。原生的预测是有界的（默认最高 1.44 pt 且不超过下一段的 8%），并且绝不会滞后于标注的扫亮进度。
 
-## Host API
+## 宿主 API
 
-`LyricsConfiguration` remains the single configuration value. `motion` exposes blur radius/cap/transition, pointer exit delay, click stagger, BG reveal duration, resize spring, exit fade, catch-up bounds and highlight anticipation. The top-level configuration also exposes interlude-dot scale. Existing typography, palette, alignment, timing, spring, quality and surface controls remain available. These are renderer-owned semantics, not host mutations of internal layers.
+`LyricsConfiguration` 依然是唯一的配置值对象。`motion` 暴露了模糊半径/上限/过渡时长、指针移出延迟、点击交错延迟、伴唱展开时长、尺寸调整弹簧、退出淡出、补齐边界以及高亮预测。顶层配置还暴露了间奏点缩放（`interludeDotScale`）。现有的排版、调色板、对齐、计时策略、弹簧、渲染质量以及表面渲染控制依然可用。这些均为渲染器自持的语义，而非宿主对内部图层的直接篡改。
 
 ```swift
 var configuration = LyricsConfiguration()
-configuration.motion.pointerExitDelay = 0 // blur begins immediately on exit
+configuration.motion.pointerExitDelay = 0 // 移出后立即开始模糊过渡
 configuration.motion.blurTransition = 0.45
 configuration.motion.resizeSpring = SpringParameters(mass: 1, damping: 22, stiffness: 120, soft: true)
 configuration.interludeDotScale = 1
@@ -41,16 +39,12 @@ lyrics.configuration = configuration
 lyrics.synchronize(time: time, playing: playing, seek: true, motion: .immediate)
 ```
 
-All-nil channel modes preserve the surface preset. Setting any channel enables explicit ink composition, with remaining nil channels using normal. The base ink mode switches between inactive/current; the highlight mode is composed into the glyph's premultiplied ink gradient before the single glyph alpha mask, so it never blends with the window or cover backdrop. Inactive/current modes may still select a host compositor for the complete lyric surface. Filter objects are cached by mode. Motion and channel-only configuration changes do not reshape text. The Demo exposes all three blend selectors plus a colored backdrop test that makes the internal-only highlight path observable. A lyric click requests seek and starts playback; slider/back/forward retain playback state and use immediate motion.
+所有通道模式为 nil 时将保留表面预设。设置任意通道将启用显式墨水合成，其余为 nil 的通道默认使用 normal。基础墨水模式在 inactive/current 之间切换；highlight 模式在单字形 alpha 遮罩之前合成到字形的预乘墨水渐变中，因此它绝不会与窗口或封面背景混合。inactive/current 模式仍可选择宿主合成器来渲染完整的歌词表面。滤镜对象按模式缓存。仅修改动画与通道的配置变更不会触发文本重新排版（reshape）。Demo 暴露了全部三个混合选择器，并提供一个彩色背景测试项，使仅内部生效的高亮通道路径清晰可见。点击歌词行会请求 seek 并启动播放；滑块拖拽/快退/快进则保留播放状态并采用 immediate 立即运动。
 
-## Verification
+## 验证
 
-`BehaviorRegressionTests` covers blur transition and pointer deadline, top-to-bottom click startup, scrub cancellation, malformed/whitespace mask continuity, forward gap anticipation, catch-up past truncated group end, and emphasis teardown with independent blend channels. Existing decoder, timing, layout, cache and spring tests remain required.
+`BehaviorRegressionTests` 覆盖了模糊过渡与指针截止时间、自顶向下点击启动、进度条拖动取消排队、异常/空白遮罩连续性、前向间隙预测、跨越截断组结束的补齐追赶，以及带有独立混合通道的重音清理。现有的解码器、计时策略、布局、缓存和弹簧测试依然是强制门禁。
 
-The current standalone regression run passes 99 tests. A background reveal test also checks continuous entry/exit height and bounded scale with no independent slide. Pointer enter/move/exit events are handled by an always-active tracking area; pointer exit starts the blur tween immediately by default. Blur exempts every currently hot or retained parallel foreground row, while interlude and ordinary historical rows still blur. Resize reflow uses a critically damped, zero-initial-velocity track so a newly wrapped half-line follows the new geometry without focus-change bounce. The three interlude dots use a centered transform anchor and expose their diameter through `interludeDotScale`. Manual browsing remains suspended while the pointer is inside; after pointer exit it resumes at the profile timeout (five seconds for the current-player profile), using the same ordered spring cascade rather than a hard reset.
+当前独立回归测试套件包含 99 个测试且全部通过。伴唱展开测试还验证了连续的进出高度以及无独立滑动的有界缩放。指针进入/移动/移出事件由常驻激活的跟踪区域（tracking area）处理；指针移出默认立即启动模糊补间。模糊逻辑对当前所有活跃或保留的并行前景行予以豁免，而间奏行与常规历史行依然会正常模糊。窗口尺寸调整重新排版（resize reflow）采用临界阻尼、零初始速度的轨道，使新折行的半行能顺畅贴合新几何结构，而不会产生焦点切换的反弹晃动。三个间奏点采用居中的变换锚点，并通过 `interludeDotScale` 暴露直径大小。当指针在视图内时，手动浏览悬停保持挂起；指针移出后，在预设超时（当前播放器预设为 5 秒）后恢复自动跟随，且采用相同的有序弹簧级联动画而非生硬重置。
 
-The package-level suite does not replace consuming-app acceptance. Host checks
-must cover the exact app's main/fullscreen/compact surfaces, theme and artwork
-mapping, player clock, track replacement, reparenting, occlusion, and restart.
-No numerical visual-parity or machine-independent performance claim is made by
-this document.
+包级别的测试套件不能替代宿主应用的完整验收。宿主检查必须覆盖具体应用的主界面/全屏/紧凑迷你视图、主题与封面图提取映射、播放器时钟、切歌曲目替换、视图重设父容器（reparenting）、遮挡以及重启恢复。本文档不作任何数值维度的完全视觉对齐或与机器无关的性能断言。
