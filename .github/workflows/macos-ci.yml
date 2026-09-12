@@ -12,7 +12,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate package manifest
         run: swift package dump-package >/dev/null
-      - name: Build all products
-        run: swift build --configuration debug
+      - name: Build all products (debug, warnings as errors)
+        run: swift build --configuration debug -Xswiftc -warnings-as-errors
+      - name: Build all products (release, warnings as errors)
+        run: swift build --configuration release -Xswiftc -warnings-as-errors
       - name: Run tests
         run: swift test --configuration debug
+      - name: Probe smoke (real scale)
+        run: swift run --quiet MelismaKitProbe --scale 120 --paused /tmp/melismakit-probe-ci 10 760 720
+      - name: Verify fixture corpus integrity
+        run: swift run --quiet MelismaKitBench --verify-fixtures
