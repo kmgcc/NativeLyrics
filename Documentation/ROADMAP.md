@@ -663,5 +663,5 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | 1A | P1-5 全部引用改名（README / Documentation / VALIDATION / BEHAVIOR-REGRESSIONS / script / bundle id） | `e90ca7b` |
 | 2026-09-12 | 1A | P1-6 tag 策略确认（`v0.2.0` annotated） | `e90ca7b` |
 | 2026-09-12 | 1A | P1-7 全仓旧名清零检查通过 | `e90ca7b` |
-| 2026-09-12 | 1A | P1-2 GitHub 仓库改名 `kmgcc/NativeLyrics` → `kmgcc/melismakit` | `5793004` |
-| 2026-09-12 | 1A | P1-8 外部消费者 `from: "0.2.0"` 解析 + README 示例编译通过 | `5793004` |
+| 2026-09-12 | 1A | P1-2 GitHub 仓库改名 `kmgcc/NativeLyrics` → `kmgcc/melismakit` | `357e013`（Phase 1A 收尾记录提交） |
+| 2026-09-12 | 1A | P1-8 外部消费者 `from: "0.2.0"` 解析 + README 示例编译通过 | `357e013`（Phase 1A 收尾记录提交） |
