@@ -225,6 +225,9 @@ func usesVisualWordTiming(_ line: LyricLine, document: LyricsDocument) -> Bool {
     /// The state transition is intentionally identical to `load(ttml:)` after
     /// parsing succeeds.
     public func install(document: LyricsDocument, time: Double = 0, playing: Bool = false, hostTime: Double = CACurrentMediaTime()) {
+        // Phase 2：新文档装载前清空文本级布局缓存（key 随歌词内容变化），
+        // 字体级缓存跨歌保留复用。
+        layoutEngine.beginInstall()
         self.document = document
         groups.forEach { $0.root.removeFromSuperlayer() }; groups.removeAll()
         rebuildTimeline(); interaction.resume(); gapIdentity = nil; gapLastMedia = -Double.infinity; lastFocus = -1

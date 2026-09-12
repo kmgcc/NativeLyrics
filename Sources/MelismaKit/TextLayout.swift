@@ -50,6 +50,53 @@ struct GroupTextLayout {
 
 final class TextLayoutEngine {
     private(set) var layoutCount = 0
+
+    // Phase 2（P2-1）：字体解析缓存。
+    // font() 每次调用都会走 NSFontManager.shared.availableMembers(ofFontFamily:)，
+    // 那是一次没有系统级缓存的全表扫描，是装载阻塞（install 0.27–1.64s）的主要来源。
+    // key 覆盖 family / size / cssWeight / italic / fontWeight，解析一次后复用。
+    // 该缓存跨装载保留：key 空间很小（同一配置下只有几组 family×size×weight 组合），
+    // 切歌时直接复用，字体解析只发生一次。
+    private struct FontKey: Hashable {
+        var family: String
+        var size: Double
+        var cssWeight: Double
+        var italic: Bool
+        var fontWeight: Double
+    }
+    private var fontCache: [FontKey: CTFont] = [:]
+
+    // Phase 2（P2-3）：度量缓存。
+    // 同一文本在同一字体参数下会被多次整形：atomWidths 预测量、baseRuns、
+    // ruby/roman 宽度、chorus 重复行。按 key 缓存 fontRuns 的分段结果与总宽度。
+    // key 覆盖 text / family / familyCJK / size / fontWeight（即 font() 的全部输入）。
+    private struct MeasureKey: Hashable {
+        var text: String
+        var family: String
+        var familyCJK: String?
+        var size: Double
+        var fontWeight: Double
+    }
+    private var runCache: [MeasureKey: [(text: String, font: CTFont)]] = [:]
+    private var widthCache: [MeasureKey: Double] = [:]
+
+    /// 新文档装载前调用：清空文本级缓存（key 随歌词内容变化，旧歌的文本不再命中），
+    /// 保留字体级缓存（key 空间小，跨歌可复用）。
+    func beginInstall() {
+        runCache.removeAll(keepingCapacity: true)
+        widthCache.removeAll(keepingCapacity: true)
+    }
+
+    private func measureKey(_ text: String, _ config: LyricsConfiguration, _ size: Double) -> MeasureKey {
+        MeasureKey(
+            text: text,
+            family: config.fontName,
+            familyCJK: config.fontNameCJK?.trimmingCharacters(in: .whitespacesAndNewlines),
+            size: size,
+            fontWeight: config.fontWeight
+        )
+    }
+
     func group(_ group: PreparedGroup, width: Double, config: LyricsConfiguration, dynamic: Bool, hasDuet: Bool) -> GroupTextLayout {
         layoutCount += 1
         let size = max(10,config.fontSize)
@@ -76,7 +123,15 @@ final class TextLayoutEngine {
         let base = NSFont(name: familyName, size: size)
             ?? NSFont.systemFont(ofSize: size, weight: .semibold)
         let cssWeight = max(100, min(900, config.fontWeight * 500 + 400))
+        let italic = base.fontDescriptor.symbolicTraits.contains(.italic)
+        let key = FontKey(family: familyName, size: size, cssWeight: cssWeight, italic: italic, fontWeight: config.fontWeight)
+        if let cached = fontCache[key] { return cached }
+        let resolved = resolveFont(base: base, config: config, size: size, cssWeight: cssWeight, italic: italic)
+        fontCache[key] = resolved
+        return resolved
+    }
 
+    private func resolveFont(base: NSFont, config: LyricsConfiguration, size: Double, cssWeight: Double, italic: Bool) -> CTFont {
         // NSFontDescriptor's numeric weight trait is only a hint for many
         // families (Helvetica Neue and PingFang silently resolve every value
         // to the regular face).  Resolve a concrete family member instead so
@@ -97,7 +152,6 @@ final class TextLayoutEngine {
                 let weight = row.count > 2 ? ((row[2] as? NSNumber)?.doubleValue ?? 5) : 5
                 return Member(name: name, label: label, weight: weight)
             }
-            let italic = base.fontDescriptor.symbolicTraits.contains(.italic)
             let candidates = parsed.filter { member in
                 let lower = member.label.lowercased()
                 return lower.contains("italic") == italic
@@ -155,6 +209,8 @@ final class TextLayoutEngine {
     /// family CoreText happens to choose first.
     private func fontRuns(_ text: String, config: LyricsConfiguration, size: Double) -> [(text: String, font: CTFont)] {
         guard !text.isEmpty else { return [] }
+        let key = measureKey(text, config, size)
+        if let cached = runCache[key] { return cached }
         var result: [(text: String, font: CTFont)] = []
         var current = ""
         var currentIsCJK: Bool?
@@ -171,12 +227,18 @@ final class TextLayoutEngine {
         if !current.isEmpty {
             result.append((current, font(config, size: size, text: current)))
         }
+        runCache[key] = result
         return result
     }
 
     private func measuredWidth(_ text: String, config: LyricsConfiguration, size: Double) -> Double {
-        fontRuns(text, config: config, size: size)
+        guard !text.isEmpty else { return 0 }
+        let key = measureKey(text, config, size)
+        if let cached = widthCache[key] { return cached }
+        let width = fontRuns(text, config: config, size: size)
             .reduce(0) { $0 + Self.width($1.text, font: $1.font) }
+        widthCache[key] = width
+        return width
     }
 
     private func select(_ layers: [LyricTextLayer], language: String) -> LyricTextLayer? {
@@ -253,17 +315,24 @@ final class TextLayoutEngine {
                 let text = atom.word.text.trimmingCharacters(in:.whitespacesAndNewlines)
                 if text.isEmpty { x += w; continue }
                 let baseRuns = fontRuns(text, config: config, size: fontSize)
-                let baseWidth = baseRuns.reduce(0) { $0 + Self.width($1.text, font: $1.font) }
+                // 复用 measuredWidth 的缓存：同一文本的预测量（atomWidths）与本处
+                // 的居中宽度只做一次 Core Text 整形。
+                let baseWidth = measuredWidth(text, config: config, size: fontSize)
                 let baseX = max(0,(w-baseWidth)/2)
                 let mainY = hasRuby ? fontSize*0.5 : 0
                 var pieces: [GlyphPlacement] = []
                 if atom.emphasis != nil && config.emphasis {
+                    // 逐字符保持字形身份与时间；同一 run 内只解析一次字体
+                    // （P2-2：消除逐字符 font() 解析），宽度仍按字符逐个度量。
                     var cx = baseX
-                    for (j,ch) in text.enumerated() {
-                        let value = String(ch)
-                        let charFont = font(config, size: fontSize, text: value)
-                        let cw = Self.width(value, font: charFont)
-                        pieces.append(.init(text:value,origin:CGPoint(x:cx,y:mainY),width:cw,font:charFont,characterIndex:atom.characterOffset+j)); cx += cw
+                    var charIndex = 0
+                    for run in baseRuns {
+                        for ch in run.text {
+                            let value = String(ch)
+                            let cw = Self.width(value, font: run.font)
+                            pieces.append(.init(text:value,origin:CGPoint(x:cx,y:mainY),width:cw,font:run.font,characterIndex:atom.characterOffset+charIndex)); cx += cw
+                            charIndex += 1
+                        }
                     }
                 } else {
                     var cx = baseX
@@ -276,7 +345,7 @@ final class TextLayoutEngine {
                 if hasRuby {
                     let text = atom.word.ruby.map(\.text).joined()
                     let rubyRuns = fontRuns(text, config: config, size: max(10, fontSize*0.5))
-                    let rw = rubyRuns.reduce(0) { $0 + Self.width($1.text, font: $1.font) }
+                    let rw = measuredWidth(text, config: config, size: max(10, fontSize*0.5))
                     if !text.isEmpty {
                         var rx = (w-rw)/2
                         for run in rubyRuns {
@@ -289,7 +358,7 @@ final class TextLayoutEngine {
                 if hasRoman, !atom.word.romanization.isEmpty {
                     let text = atom.word.romanization
                     let romanRuns = fontRuns(text, config: config, size: max(10, fontSize*0.5))
-                    let rw = romanRuns.reduce(0) { $0 + Self.width($1.text, font: $1.font) }
+                    let rw = measuredWidth(text, config: config, size: max(10, fontSize*0.5))
                     var rx = (w-rw)/2
                     for run in romanRuns {
                         let runWidth = Self.width(run.text, font: run.font)
@@ -301,12 +370,15 @@ final class TextLayoutEngine {
                     // Keep glyph identity/time; split at grapheme boundaries without dropping content.
                     var cx = 0.0, cy = 0.0
                     pieces = []
-                    for (j,ch) in text.enumerated() {
-                        let value = String(ch)
-                        let charFont = font(config, size: fontSize, text: value)
-                        let cw = Self.width(value, font: charFont)
-                        if cx+cw>width && cx>0 { cx = 0; cy += rowHeight }
-                        pieces.append(.init(text:value,origin:CGPoint(x:cx,y:cy+mainY),width:cw,font:charFont,characterIndex:atom.emphasis == nil ? nil : atom.characterOffset+j)); cx += cw
+                    var charIndex = 0
+                    for run in baseRuns {
+                        for ch in run.text {
+                            let value = String(ch)
+                            let cw = Self.width(value, font: run.font)
+                            if cx+cw>width && cx>0 { cx = 0; cy += rowHeight }
+                            pieces.append(.init(text:value,origin:CGPoint(x:cx,y:cy+mainY),width:cw,font:run.font,characterIndex:atom.emphasis == nil ? nil : atom.characterOffset+charIndex)); cx += cw
+                            charIndex += 1
+                        }
                     }
                     words.append(.init(atom:atom,rect:CGRect(x:x,y:y,width:width,height:rowHeight+cy),pieces:pieces,width:baseWidth,fontSize:fontSize,fadeHeight:rowHeight))
                     y += cy
