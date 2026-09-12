@@ -363,11 +363,11 @@ Host App
 
 **维护者亲自核对的项**（两侧原文均已写入 `PROVENANCE.md`）：`Motion.swift` 的 `interludeSample`（保留常量 `1.70158*1.525` 与局部变量名 `c2`）、`SpringParameters` 三组弹簧参数与上游 `base.ts` 逐值相同、`Document.swift` 的 `alignPosition 0.35` / `overscan 300` / `wordFadeWidth 0.5` 逐值相同。
 
-**仍需维护者做的事**：`PROVENANCE.md` 的 8 文件全覆盖表是**机器辅助比对**结果。Gate 1B 要求逐条人工确认，在那之前它只能当强起点，不能当已审计结论。
+**✅ Gate 1B 状态（2026-09-12）**：维护者已逐条确认 `PROVENANCE.md` 的 8 文件全覆盖表，Gate 1B 通过，审计唯一的 BLOCKER 正式关闭。该表虽以机器辅助比对起步，经人工逐条确认后即为已审计结论。
 
 **⚠️ 1B 期间的意外发现（已修，独立提交 `d1631ec`）**：四个 Demo fixture 把 span 时间写成了「行内相对时间」，而 AMLL/Apple Music profile 的每一层（div / p / span）都是**绝对媒体时间**。库本身对真实格式处理完全正确（已用两份绝对时间文档验证），但 fixture 不合规导致所有行的时间塔缩到 0、Demo 从 t≥8s 起直接进入「曲终」状态、画面几乎静止。四个 fixture 已用合规绝对时间重写，「测试腔」歌词换成原创的、像真实歌曲的内容。**这是审计漏掉的一项**：库正确、示例错误，而示例正是第一印象。
 
-**Gate 1B**：P1-9 的派生清单覆盖全部 8 个源文件；`NOTICE` 与 `LICENSING.md` 经维护者逐条确认与清单一致；派生文件头有派生声明；README 有「与 AMLL 的关系」段与至少 1 张截图。
+**Gate 1B**：P1-9 的派生清单覆盖全部 8 个源文件；`NOTICE` 与 `LICENSING.md` 经维护者逐条确认与清单一致；派生文件头有派生声明；README 有「与 AMLL 的关系」段与至少 1 张截图。**—— ✅ 2026-09-12 通过（维护者逐条确认完成）**
 
 ---
 
@@ -558,7 +558,7 @@ Host App
 |---|---|
 | **G1A** | 改名完成（`MelismaKit`）且 `git grep` 旧名仅剩历史记录；全新 clone 后 Debug+Release 构建零警告 / 测试 / Demo / Probe 全部正常；外部消费者能从新 URL 解析 `v0.2.0`；GitHub 旧仓名 redirect 生效 —— **✅ 2026-09-12 全部通过** |
 | **G0** | 性能基线可复现；CI 有 Release + Probe + warnings-as-errors；对抗用例进测试 |
-| **G1B** | 派生清单覆盖全部源文件；`NOTICE` + `LICENSING.md` 与清单一致；派生文件头有声明；README 有「与 AMLL 的关系」段与截图。**达成即清掉审计唯一的 BLOCKER** —— 产出物于 2026-09-12 全部就位，**唯一剩余动作：维护者逐条确认 `PROVENANCE.md` 的 8 文件表** |
+| **G1B** | 派生清单覆盖全部源文件；`NOTICE` + `LICENSING.md` 与清单一致；派生文件头有声明；README 有「与 AMLL 的关系」段与截图。**达成即清掉审计唯一的 BLOCKER** —— **✅ 2026-09-12 通过：产出物全部就位，维护者已逐条确认 `PROVENANCE.md` 的 8 文件表** |
 | G2 | 120 行 `load()` < 150 ms；400 行 < 400 ms；帧护栏无回退；截图确认视觉无变化 |
 | G3 | 公共 API 无宿主词汇；preset 可用；DocC 无未文档化 public symbol；Demo 控件数下降 |
 | G4 | 改渲染必触发 golden 失败；CI matrix 完成；PERFORMANCE.md 含合成侧数字 |
@@ -671,6 +671,8 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | **Phase 1A 改名执行完毕，G1A 通过** | P1-1..P1-8 全部完成。本地：包名/产品/target/目录/类型/文档/脚本全部改为 `MelismaKit`，目录用 `git mv` 保留历史，类型名只改 `MelismaKitViewRepresentable` 一处（commit `e90ca7b`）。远端：仓库 `kmgcc/NativeLyrics` → `kmgcc/melismakit`，旧 URL redirect 有效，annotated tag `v0.2.0` 已推送，`0.1.x` tag 与历史未动。验证：Debug+Release 零警告、`swift test` 99 全绿、Probe p95 1.33 ms（基线 1.195，无回退）、Demo 包与启动正常、全新 clone 复验通过、外部消费者 `from: "0.2.0"` 解析到 revision `5665da5` 且 README 示例零警告可运行。**下一步：Phase 0** |
 | 2026-09-12 | **Phase 1B 完成，审计唯一的 BLOCKER 已清除**（待维护者逐条确认） | 8 个源文件逐一比对 AMLL（legacy 0.2.1 + 当前 main）产出 `PROVENANCE.md`；新增 `NOTICE`；`LICENSING.md` 改为准确表述并附资产登记模板；派生文件加头注释；README 加主视觉 + 4 张确定性渲染特性图与「与 AMLL 的关系」段（commit `f816464`、`a957603`）。清单为机器辅助比对，Gate 1B 要求的逐条人工确认仍未做 |
 | 2026-09-12 | **发现并修复：Demo fixture 不符合 AMLL profile** | 四个 fixture 用行内相对 span 时间，而 AMLL/Apple Music 每层（div/p/span）都是绝对时间；库处理正确、示例错误，导致 Demo 画面几乎静止、永不高亮。四个 fixture 用合规绝对时间重写、歌词换成原创歌曲内容（commit `d1631ec`）。**这是审计漏掉的一项** —— 库正确而示例错误，示例却是第一印象 |
+| 2026-09-12 | **Gate 1B 通过：维护者逐条确认 `PROVENANCE.md`** | 维护者审阅并确认 8 文件派生清单与 `NOTICE` / `LICENSING.md` 一致。审计唯一的 BLOCKER 正式关闭。README「与 AMLL 的关系」段即为此确认的对外声明：部分代码基于 AMLL 参考与修改而来，同为 `AGPL-3.0-only` 开源，并向 AMLL 致谢 |
+| 2026-09-12 | **文档语言政策：一律中文** | 项目面向国内用户优先，以后所有文档与代码注释统一用中文撰写，英文后续再拓展。README 与 5 份 Documentation/ 文档已由维护者翻译为中文（commit `e2e8b6f`）；`NOTICE` 为法律文本，保持英文原样；代码注释从 Phase 0 起的新增内容即用中文（存量英文注释的转换另行安排） |
 
 ### 任务完成记录
 
@@ -691,3 +693,4 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | 1B | P1-14 README 主视觉 + 4 张确定性渲染特性图 | `a957603` |
 | 2026-09-12 | 1B | P1-15 README「与 AMLL 的关系」段 | `a957603` |
 | 2026-09-12 | — | 附：Demo fixture 改为合规绝对时间 + 原创歌词（审计漏项） | `d1631ec` |
+| 2026-09-12 | — | 附：README 与 Documentation 全部文档翻译为中文（维护者执行） | `e2e8b6f` |
