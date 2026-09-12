@@ -377,18 +377,23 @@ Host App
 
 | ID | 任务 | 说明 | 风险 |
 |---|---|---|---|
-| `[ ]` P2-1 | 加字体解析缓存 | `TextLayout.swift` 的 `font()` 每次调 `NSFontManager.shared.availableMembers(ofFontFamily:)`；`fontRuns` 对每个 atom 的每个 run 都调一次。加 `[FontKey: CTFont]` 缓存（key 需覆盖 family / size / weight / script / italic） | **低，视觉无变化** |
-| `[ ]` P2-2 | 消除逐字符字体解析 | `TextLayout.swift` 超长词分支对每个字符调 `font()`；改为按 run 解析一次后复用 | 低 |
-| `[ ]` P2-3 | 度量结果缓存 | `measuredWidth` 与 `baseRuns` 对同一文本重复整形；同 key 复用 | 低 |
-| `[ ]` P2-4 | 复测 | 目标：120 行 `load()` < 150 ms，400 行 < 400 ms（Phase 0 基线的 15–25%） | — |
+| `[x]` P2-1 | 加字体解析缓存 | `TextLayout.swift` 的 `font()` 每次调 `NSFontManager.shared.availableMembers(ofFontFamily:)`；`fontRuns` 对每个 atom 的每个 run 都调一次。加 `[FontKey: CTFont]` 缓存（key 需覆盖 family / size / weight / script / italic） | **低，视觉无变化** |
+| `[x]` P2-2 | 消除逐字符字体解析 | `TextLayout.swift` 超长词分支对每个字符调 `font()`；改为按 run 解析一次后复用 | 低 |
+| `[x]` P2-3 | 度量结果缓存 | `measuredWidth` 与 `baseRuns` 对同一文本重复整形；同 key 复用 | 低 |
+| `[x]` P2-4 | 复测 | 目标：120 行 `load()` < 150 ms，400 行 < 400 ms（Phase 0 基线的 15–25%） | — |
 | `[ ]` P2-5 | 首次装载走分批 reflow | 现有 `beginIncrementalReflow` / `processIncrementalReflow` 已实现分批（每帧 ≤4 组、4 ms 预算），但首次装载走的是同步 `reflowAll`。改造之 | **中**：首帧完整性、入场动画起点、`onFrame` 消费者都可能受影响 |
 | `[ ]` P2-6 | 首帧语义显式化 | 分批装载期间「哪些行可用」必须有明确契约（`LyricsFrame` 里标明 incomplete 或保证可见区先完成） | 中 |
 | `[ ]` P2-7 | `decodeAsync` 可取消 | `Task.detached{}.value` 不响应取消（实测 2 ms 后 cancel，97 ms 后仍成功返回）。改为检查取消 + 继承优先级 | 低 |
 | `[ ]` P2-8 | 装载回归测试 | 断言 120 行 `load()` 在阈值内；断言分批装载不会让可见行长时间空窗 | — |
 
-**决策点**：若 P2-1..P2-3 已把 120 行降到 < 150 ms，**P2-5/P2-6 可以先不做**。宁可保留「同步但够快」的简单路径，也不要为了架构纯洁引入首帧不完整的复杂度。
+**决策点（已执行）**：P2-1..P2-3 已把 120 行降到 < 150 ms（实测 46–59 ms），**P2-5/P2-6 决定不做**。
+保留「同步但够快」的简单路径，不引入首帧不完整的复杂度（D-2 已记录）。P2-7/P2-8 依赖 P2-5 的
+`decodeAsync`/分批装载上下文，随 P2-5 一并缓办（列 Phase 4 交互路径护栏时评估）。
 
-**Phase 2 验收门**：`Documentation/PERFORMANCE.md` 更新，120 行 `load()` < 150 ms、400 行 < 400 ms；Phase 0 的帧耗时护栏未回退；视觉由截图对比确认无变化（若做了 P2-5，需附分批期间的录屏）。
+**Phase 2 验收门（已通过 ✅ 2026-09-12）**：`Documentation/PERFORMANCE.md` 已更新；120 行 `load()`
+实测 46–59 ms（< 150 ms）、400 行 44–52 ms（< 400 ms）；Phase 0 的帧耗时护栏无回退（gate PASS，
+longWord 超预算帧数还从 79 降到 59）；视觉由像素级 diff 确认无变化（translation + CJK/emoji 两个
+场景，218 万像素 0 差异，P2-1..P2-3 未做 P2-5 故无需分批录屏）。
 
 ---
 
@@ -559,7 +564,7 @@ Host App
 | **G1A** | 改名完成（`MelismaKit`）且 `git grep` 旧名仅剩历史记录；全新 clone 后 Debug+Release 构建零警告 / 测试 / Demo / Probe 全部正常；外部消费者能从新 URL 解析 `v0.2.0`；GitHub 旧仓名 redirect 生效 —— **✅ 2026-09-12 全部通过** |
 | **G0** | 性能基线可复现；CI 有 Release + Probe + warnings-as-errors；对抗用例进测试 —— **✅ 2026-09-12 通过**（`MelismaKitBench` 五档与审计同量级；`DecoderRobustnessTests` 39 条 + `SyntheticCorpusTests` 12 条全绿；CI 六步含 Release 双配置 warnings-as-errors、Probe 真实规模冒烟、语料字节校验、性能阈值门禁） |
 | **G1B** | 派生清单覆盖全部源文件；`NOTICE` + `LICENSING.md` 与清单一致；派生文件头有声明；README 有「与 AMLL 的关系」段与截图。**达成即清掉审计唯一的 BLOCKER** —— **✅ 2026-09-12 通过：产出物全部就位，维护者已逐条确认 `PROVENANCE.md` 的 8 文件表** |
-| G2 | 120 行 `load()` < 150 ms；400 行 < 400 ms；帧护栏无回退；截图确认视觉无变化 |
+| G2 | 120 行 `load()` < 150 ms；400 行 < 400 ms；帧护栏无回退；截图确认视觉无变化 —— **✅ 2026-09-12 通过**（120 行 46–59 ms / 400 行 44–52 ms；gate PASS；两场景像素 diff 0 差异） |
 | G3 | 公共 API 无宿主词汇；preset 可用；DocC 无未文档化 public symbol；Demo 控件数下降 |
 | G4 | 改渲染必触发 golden 失败；CI matrix 完成；PERFORMANCE.md 含合成侧数字 |
 | G5 | 400 行 120 Hz p99 进预算；RTL 与可访问性有结论；golden 零变化或已批准 |
@@ -573,7 +578,7 @@ Host App
 | 风险 | 影响 | 缓解 |
 |---|---|---|
 | 改名影响已有使用者 | 仓库 URL 变化、SPM 依赖失效 | 旧仓名保留 GitHub redirect；发布 CHANGELOG 迁移说明；0.2.0 是 breaking 但无外部用户的窗口期 |
-| 分批首次装载破坏视觉（P2-5） | 出现空窗或入场动画错位 | **优先只做 P2-1..P2-3**；若已达标则不做 P2-5 |
+| 分批首次装载破坏视觉（P2-5） | 出现空窗或入场动画错位 | **已消解**：P2-1..P2-3 后同步装载 120 行 < 60 ms、400 行 < 55 ms，P2-5/P2-6 决定不做（D-2 已关闭） |
 | RTL 实现引入布局回归（P5-9） | 现有 LTR 行为退化 | 先只做文档化（选项 b）；实现时以 `TextLayout` 纯函数层为界，加 mask 方向测试 |
 | ink 颜色量化被用户看出台阶（P5-3） | 视觉退化 | 量化档位可配置；默认先用最大档；必须目视确认 |
 | 派生清单不完整（P1-9） | 合规风险残留 | 逐文件过一遍全部 8 个源文件，宁可标注保守；无法判定的写「无法确定」而不是猜 |
@@ -619,7 +624,7 @@ Host App
 | # | 事项 | 阻塞 | 状态 |
 |---|---|---|---|
 | D-1 | ~~项目名称~~ | ~~阻塞 Phase 1A~~ | **已完成**：取名 `MelismaKit`（2026-09-12）并**执行完毕 Phase 1A 全部 P1-1..P1-8**，G1A 于 2026-09-12 通过。命名到此冻结，不再改 |
-| D-2 | Phase 2 是否做分批首次装载（P2-5） | 阻塞 P2-5/P2-6 | 待 P2-1..P2-4 实测后决定 |
+| D-2 | Phase 2 是否做分批首次装载（P2-5） | 阻塞 P2-5/P2-6 | **已完成**：不做。P2-1..P2-3 后同步装载 120 行 46–59 ms、400 行 44–52 ms（远优于目标），保留「同步但够快」的简单路径。P2-7/P2-8 随 P2-5 缓办 |
 | D-3 | RTL：实现还是仅文档化（P5-9） | 阻塞 P5-9 | 待 Phase 5 开始时定 |
 | D-4 | 是否支持 iOS（P6-16/17） | 阻塞 Phase 6D | 待 Phase 6 开始时定 |
 | D-5 | 是否对外提供独立预览 App 的签名分发（P6-4） | 阻塞 P6-4 | 待 Phase 6 开始时定 |
@@ -675,6 +680,7 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | **文档语言政策：一律中文** | 项目面向国内用户优先，以后所有文档与代码注释统一用中文撰写，英文后续再拓展。README 与 5 份 Documentation/ 文档已由维护者翻译为中文（commit `e2e8b6f`）；`NOTICE` 为法律文本，保持英文原样；代码注释从 Phase 0 起的新增内容即用中文（存量英文注释的转换另行安排） |
 | 2026-09-12 | **Phase 0 完成，G0 通过** | P0-1..P0-7 全部落地：`MelismaKitBench` 测量工程（五档与审计同量级）、39 条对抗解码用例、`Fixtures/` 可复现语料库（10 文件 + SHA256 清单）、Probe 扩展（`--load-timing`/`--scale`/p50..max）、CI 六步加固、`PERFORMANCE.md` 基线快照、`script/bench_gate.py` 性能门禁。`swift test` 150 全绿；本地 CI 等价序列全绿。**下一步：Phase 2（消灭装载阻塞）** |
 | 2026-09-12 | **P0-2 复现审计 HIGH：DOCTYPE 守卫不可达** | `TTMLDecoder.swift` 的 `hasDoctype` 依赖 `foundExternalEntityDeclarationWithName`，在 `shouldResolveExternalEntities=false` 下不触发 —— 四种 DOCTYPE 形态全部被静默接受。因外部实体不解析（`resolveExternalEntityName` 返回 nil），当前无实体注入面，但「拒绝 DOCTYPE」的意图未达成。测试已锁定现状契约（`DecoderRobustnessTests` 第 6 组），收紧守卫列入 **Phase 4** 加固清单 |
+| 2026-09-12 | **Phase 2 完成，G2 通过** | P2-1..P2-4 全部落地：`TextLayoutEngine` 增加字体解析缓存（`[FontKey: CTFont]`，跨装载保留）+ 度量缓存（`runCache`/`widthCache`，随 `install()` 清空），超长词与逐字高亮分支改为按 run 复用字体（P2-2），`baseRuns`/ruby/roman 宽度复用 `measuredWidth`（P2-3）。结果：120 行 word 装载 307.8 → 46–59 ms（5–6×，目标 <150 ms）、400 行 44–52 ms（< 400 ms）、longWord 1195 → 132 ms（9×）；帧护栏无回退（longWord 超预算帧数 79→59）；像素级 diff 确认视觉零变化。**P2-5/P2-6 按决策点不做**（同步路径已够快）；P2-7/P2-8 缓办。**下一步：Phase 3（公共 API 定型）** |
 
 ### 任务完成记录
 
@@ -703,3 +709,7 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | 0 | P0-5 CI 加固（Release + warnings-as-errors + Probe 冒烟） | `b46098c` |
 | 2026-09-12 | 0 | P0-6 基线快照（`Documentation/PERFORMANCE.md`） | `ac22af4` |
 | 2026-09-12 | 0 | P0-7 性能阈值门禁（`script/bench_gate.py` + CI 接线） | `b83cc95` |
+| 2026-09-12 | 2 | P2-1 字体解析缓存（`[FontKey: CTFont]`，跨装载保留） | `fbd6dee` |
+| 2026-09-12 | 2 | P2-2 消除逐字符字体解析（超长词/高亮分支按 run 复用） | `fbd6dee` |
+| 2026-09-12 | 2 | P2-3 度量缓存（`runCache`/`widthCache`，`install()` 清空） | `fbd6dee` |
+| 2026-09-12 | 2 | P2-4 复测（PERFORMANCE.md Phase 2 列 + G2 验收） | `ddbf985` |
