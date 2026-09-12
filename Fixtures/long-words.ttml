@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:tts="http://www.w3.org/ns/ttml#styling" xml:lang="en">
+  <head><metadata><ttm:title>Synthetic Long-Word Stress</ttm:title></metadata></head>
+  <body dur="24s">
+<p begin="0s" end="3.6s"><span begin="0s" end="3.6s">electroencephalographically</span></p>
+<p begin="4s" end="7.6s"><span begin="4s" end="7.6s">pneumonoultramicroscopicsilicovolcanoconiosis</span></p>
+<p begin="8s" end="11.6s"><span begin="8s" end="11.6s">antidisestablishmentarianism</span></p>
+<p begin="12s" end="15.6s"><span begin="12s" end="15.6s">floccinaucinihilipilification</span></p>
+<p begin="16s" end="19.6s"><span begin="16s" end="19.6s">hippopotomonstrosesquipedaliophobia</span></p>
+<p begin="20s" end="23.6s"><span begin="20s" end="23.6s">uncharacteristicallytranscendentally</span></p>
+  </body>
+</tt>

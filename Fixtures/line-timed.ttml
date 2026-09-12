@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:tts="http://www.w3.org/ns/ttml#styling" xml:lang="en">
+  <head><metadata><ttm:title>Synthetic Line-Timed</ttm:title></metadata></head>
+  <body dur="31.6s">
+<p begin="0s" end="3.6s">City lights are fading in the quiet rain</p>
+<p begin="4s" end="7.6s">Every window keeps a story of its own</p>
+<p begin="8s" end="11.6s">We were running toward a softer light</p>
+<p begin="12s" end="15.6s">All the miles we made are turning gold</p>
+<p begin="16s" end="19.6s">Morning finds us where the river bends</p>
+<p begin="20s" end="23.6s">Hold the echo of a summer song</p>
+<p begin="24s" end="27.6s">Paper lanterns drifting down the street</p>
+<p begin="28s" end="31.6s">Somewhere past the bridges of the night</p>
+  </body>
+</tt>

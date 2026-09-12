@@ -8,14 +8,17 @@ let package = Package(
         .library(name: "MelismaKit", targets: ["MelismaKit"]),
         .library(name: "MelismaKitSwiftUI", targets: ["MelismaKitSwiftUI"]),
         .executable(name: "MelismaKitDemo", targets: ["MelismaKitDemo"]),
-        .executable(name: "MelismaKitProbe", targets: ["MelismaKitProbe"])
+        .executable(name: "MelismaKitProbe", targets: ["MelismaKitProbe"]),
+        .executable(name: "MelismaKitBench", targets: ["MelismaKitBench"])
     ],
     targets: [
         .target(name: "MelismaKit"),
         .target(name: "MelismaKitSwiftUI", dependencies: ["MelismaKit"]),
         .executableTarget(name: "MelismaKitDemo", dependencies: ["MelismaKit"], resources: [.copy("Resources")]),
-        .executableTarget(name: "MelismaKitProbe", dependencies: ["MelismaKit"]),
-        .testTarget(name: "MelismaKitTests", dependencies: ["MelismaKit"], resources: [.copy("Fixtures")])
+        .executableTarget(name: "MelismaKitProbe", dependencies: ["MelismaKit", "MelismaKitBenchCore"]),
+        .target(name: "MelismaKitBenchCore", dependencies: ["MelismaKit"]),
+        .executableTarget(name: "MelismaKitBench", dependencies: ["MelismaKit", "MelismaKitBenchCore"]),
+        .testTarget(name: "MelismaKitTests", dependencies: ["MelismaKit", "MelismaKitBenchCore"], resources: [.copy("Fixtures")])
     ],
     swiftLanguageModes: [.v5]
 )

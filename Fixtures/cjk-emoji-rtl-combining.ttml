@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:tts="http://www.w3.org/ns/ttml#styling" xml:lang="und">
+  <head><metadata><ttm:title>Synthetic CJK Emoji RTL Combining</ttm:title></metadata></head>
+  <body dur="24s">
+<p begin="0s" end="3.6s"><span begin="0s" end="3.6s">城市の灯火</span></p>
+<p begin="4s" end="7.6s"><span begin="4s" end="7.6s">🌃 霓虹 🎵</span></p>
+<p begin="8s" end="11.6s"><span begin="8s" end="11.6s">أنوار المدينة تلمع في الليل</span></p>
+<p begin="12s" end="15.6s"><span begin="12s" end="15.6s">café 与 élégant</span></p>
+<p begin="16s" end="19.6s"><span begin="16s" end="19.6s">👩‍👩‍👧‍👦 一家</span></p>
+<p begin="20s" end="23.6s"><span begin="20s" end="23.6s">夜空の星</span></p>
+  </body>
+</tt>
