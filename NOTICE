@@ -1,0 +1,83 @@
+MelismaKit
+Copyright (C) 2026 the MelismaKit contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, version 3 of the License only. The complete license text
+is in LICENSE.
+
+SPDX-License-Identifier: AGPL-3.0-only
+
+================================================================================
+Third-party notices
+================================================================================
+
+--------------------------------------------------------------------------------
+AMLL (Apple Music-like Lyrics)
+--------------------------------------------------------------------------------
+
+Portions of this software are derived from AMLL.
+
+    Project:  Apple Music-like Lyrics
+    URL:      https://github.com/steve-xmh/applemusic-like-lyrics
+    License:  AGPL-3.0-only
+    Copyright (C) AMLL contributors
+
+Derived material was consulted at:
+
+    packages/core/src/lyric-player/dom/interlude-dots.ts
+    packages/core/src/lyric-player/dom-slim/lyric-line.ts
+    packages/core/src/lyric-player/base.ts
+    packages/core/src/lyric-player/base/layout.ts
+    packages/core/src/lyric-player/base/timeline.ts
+    packages/core/src/utils/lyric-split-words.ts
+    packages/ttml/src/parser.ts
+
+Accessed 2026-09-12, at upstream 0.2.1 (legacy line, declared GPL-3.0) and
+current main (declared AGPL-3.0-only). The derived material is limited to
+timing, layout, motion, and interaction behavior; the native renderer, the XML
+decoder, the layout engine, and the value model are original work.
+
+The material has been modified: it was translated from TypeScript to Swift and
+adapted to AppKit, Core Text, and Core Animation. MelismaKit is not an official
+port of AMLL and is not affiliated with or endorsed by the AMLL project.
+
+A symbol-by-symbol derivation list, including the items that could not be
+resolved either way, is in Documentation/PROVENANCE.md.
+
+Because AMLL is licensed under AGPL-3.0-only, and this project is likewise
+licensed AGPL-3.0-only, the combined work is distributed under AGPL-3.0-only.
+Anyone distributing a modified version must preserve this notice and state
+their changes, as required by section 5 of that license.
+
+--------------------------------------------------------------------------------
+Pushkine spring solver
+--------------------------------------------------------------------------------
+
+MotionTests contains an independently written closed-form test oracle based on
+the published behavior of the Pushkine spring solver.
+
+    Author:   github.com/pushkine
+    License:  MIT
+
+The solver's source is not bundled here. Only the reference behavior was
+consulted, and the test comment records the MIT origin. MIT is compatible with
+AGPL-3.0-only.
+
+--------------------------------------------------------------------------------
+Platform frameworks
+--------------------------------------------------------------------------------
+
+AppKit, Core Text, Core Animation, Core Image, Foundation, NaturalLanguage, and
+SwiftUI are Apple platform libraries. They are linked against, not bundled.
+
+--------------------------------------------------------------------------------
+Fixtures and assets
+--------------------------------------------------------------------------------
+
+The TTML files under Sources/MelismaKitDemo/Resources and
+Tests/MelismaKitTests/Fixtures are original synthetic lyrics written for this
+project's tests and demo. They are not transcriptions of any real song.
+
+Do not add downloaded lyrics, artwork, audio, or other third-party assets
+without recording their source and license in Documentation/LICENSING.md.

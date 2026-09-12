@@ -1,3 +1,6 @@
+// Portions of this file are derived from AMLL (https://github.com/steve-xmh/applemusic-like-lyrics),
+// licensed AGPL-3.0-only, and modified for native AppKit. See Documentation/PROVENANCE.md.
+
 import Foundation
 import SwiftUI
 
