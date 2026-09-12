@@ -324,15 +324,15 @@ Host App
 
 | ID | 任务 | 产出 | 验收 |
 |---|---|---|---|
-| `[ ]` P0-1 | 把审计测量工程移植进仓库 | `Tests/MelismaKitBench/`（或 `script/bench/`）：① 规模 fixture 生成器（120/400 行、word/line 定时、ruby、长词压力、翻译）② 帧耗时分布统计（p50/p95/p99/max + 超预算帧数）③ 装载计时（decode / install / 首次渲染分离） | `swift run MelismaKitBench --scale 120` 输出与 2.2 节同量级的数字 |
-| `[ ]` P0-2 | 把 35 个对抗性解码用例转成 XCTest | `Tests/.../DecoderRobustnessTests.swift`：空/非 XML/错 root/缺 body/未闭合/错命名空间/NUL/零时长/乱序/重叠/重复 id/空 p/嵌套 x-bg/CDATA/subFrameRate/tick/emoji/ZWJ/RTL/组合字符/超长行/DOCTYPE 四种/实体引用/无界行/空白行 | 全绿；每条用例明确断言「抛错」或「成功 + 预期结构」 |
-| `[ ]` P0-3 | 建立可复现 fixture 语料库 | `Fixtures/`（**合成**、可再生成、带 SHA256 清单）：覆盖 word/line 定时、duet、ruby、翻译、romanization、背景声部、interlude、长词、CJK/emoji/RTL/组合字符 | 生成器可重跑且字节一致；清单入仓 |
-| `[ ]` P0-4 | 扩展 `MelismaKitProbe` | 增加 `--load-timing`（报告 decode / install / 首帧）、`p50 / p99 / max`、`--scale` 多档；默认 fixture 换成真实规模（保留 8 行作冒烟） | 输出的 JSON 含 `loadMilliseconds` 与完整分布；`VALIDATION.md` 同步更新 |
-| `[ ]` P0-5 | CI 第一步加固 | 增加：Release 构建、`swift run MelismaKitProbe` 冒烟、`-Xswiftc -warnings-as-errors` | 三项红灯即失败；当前零警告下应全绿 |
-| `[ ]` P0-6 | 基线快照文档 | `Documentation/PERFORMANCE.md`：记录 2.2 节全部数字 + 复现命令 + 硬件信息 | 新机器上按文档能复现同量级结果 |
-| `[ ]` P0-7 | 把 2.2 节数字写进 CI 作为阈值护栏 | 帧耗时 / 装载耗时断言（宽松阈值，防大幅回退） | 故意把 `reflowBatchLimit` 改成 1 会让 CI 红 |
+| `[x]` P0-1 | 把审计测量工程移植进仓库 | `Sources/MelismaKitBenchCore/` + `Sources/MelismaKitBench/`：① 规模 fixture 生成器（120/400 行、word/line 定时、ruby、长词压力；翻译随语料库）② 帧耗时分布统计（p50/p95/p99/max + 超预算帧数）③ 装载计时（decode / install / 首次渲染分离） | **2026-09-12 完成（commit `9005352`）**：`swift run MelismaKitBench --scale 120` 五档输出与 2.2 节同量级（120 行 word 装载 104–786 ms 落在审计 520–926 区间；长词压力 1200 ms 与审计 1412 同量级） |
+| `[x]` P0-2 | 把 35 个对抗性解码用例转成 XCTest | `Tests/MelismaKitTests/DecoderRobustnessTests.swift`：空/非 XML/错 root/缺 body/未闭合/错命名空间/NUL/零时长/乱序/重叠/重复 id/空 p/嵌套 x-bg/CDATA/subFrameRate/tick/emoji/ZWJ/RTL/组合字符/超长行/DOCTYPE 四种/实体引用/无界行/空白行（共 **39 条**） | **2026-09-12 完成（commit `efcfe4b`）**：全绿；每条用例明确断言「抛错」或「成功 + 预期结构」。**暴露审计 HIGH 项**：DOCTYPE 四种形态全部被 XMLParser 静默接受，`hasDoctype` 守卫不可达（见第 10 节记录） |
+| `[x]` P0-3 | 建立可复现 fixture 语料库 | `Fixtures/`（**合成**、可再生成、带 SHA256 清单）：word/line 定时、duet、ruby、翻译、romanization、背景声部、interlude、长词、CJK/emoji/RTL/组合字符，共 10 个文件 | **2026-09-12 完成（commit `9005352`）**：`MelismaKitBench --emit-fixtures` 可重跑且字节一致，`--verify-fixtures` 校验通过，`SHA256SUMS.txt` 入仓；`SyntheticCorpusTests` 12 条在 `swift test` 中强制生成器与解码器契约 |
+| `[x]` P0-4 | 扩展 `MelismaKitProbe` | 增加 `--load-timing`（报告 decode / install / 首帧）、`p50 / p99 / max`、`--scale` 多档；默认 fixture 换成真实规模（保留 8 行作冒烟） | **2026-09-12 完成（commit `caa7793`）**：JSON 含 `loadMilliseconds` 与完整分布；`VALIDATION.md` 同步更新 |
+| `[x]` P0-5 | CI 第一步加固 | 增加：Release 构建、`swift run MelismaKitProbe` 冒烟、`-Xswiftc -warnings-as-errors`（debug + release） | **2026-09-12 完成（commit `b46098c`）**：本地 CI 等价序列全绿（150 测试、双配置零警告构建、Probe 冒烟、语料校验） |
+| `[x]` P0-6 | 基线快照文档 | `Documentation/PERFORMANCE.md`：记录 2.2 节全部数字 + 复现命令 + 硬件信息 | **2026-09-12 完成（commit `ac22af4`）**：审计基线 + Phase 0 复测 + 波动范围 + 复现命令齐全 |
+| `[x]` P0-7 | 把 2.2 节数字写进 CI 作为阈值护栏 | 帧耗时 / 装载耗时断言（宽松阈值，防大幅回退） | **2026-09-12 完成（commit `b83cc95`）**：`script/bench_gate.py` 六项阈值 + CI 接线。**验收示例修正**：`reflowBatchLimit=1` 经实测**不**触发门禁（它只影响 seek/焦点切换的增量布局路径，10s 播放 bench 覆盖不到）；改用「单行布局拖慢 40× → install ~5.5 s」实测门禁变红（exit 1）。交互路径护栏留给 P4-8 |
 
-**Gate 0**：`swift test` 全绿（含新增用例）；Probe 能同时报告装载时间与 p50/p99/max；CI 含 Release + Probe + warnings-as-errors 三项；性能基线文档可复现。
+**Gate 0**：`swift test` 全绿（含新增用例）；Probe 能同时报告装载时间与 p50/p99/max；CI 含 Release + Probe + warnings-as-errors 三项；性能基线文档可复现。**—— ✅ 2026-09-12 通过（150 测试全绿，CI 等价序列本地复验通过）**
 
 ---
 
@@ -557,7 +557,7 @@ Host App
 | Gate | 条件 |
 |---|---|
 | **G1A** | 改名完成（`MelismaKit`）且 `git grep` 旧名仅剩历史记录；全新 clone 后 Debug+Release 构建零警告 / 测试 / Demo / Probe 全部正常；外部消费者能从新 URL 解析 `v0.2.0`；GitHub 旧仓名 redirect 生效 —— **✅ 2026-09-12 全部通过** |
-| **G0** | 性能基线可复现；CI 有 Release + Probe + warnings-as-errors；对抗用例进测试 |
+| **G0** | 性能基线可复现；CI 有 Release + Probe + warnings-as-errors；对抗用例进测试 —— **✅ 2026-09-12 通过**（`MelismaKitBench` 五档与审计同量级；`DecoderRobustnessTests` 39 条 + `SyntheticCorpusTests` 12 条全绿；CI 六步含 Release 双配置 warnings-as-errors、Probe 真实规模冒烟、语料字节校验、性能阈值门禁） |
 | **G1B** | 派生清单覆盖全部源文件；`NOTICE` + `LICENSING.md` 与清单一致；派生文件头有声明；README 有「与 AMLL 的关系」段与截图。**达成即清掉审计唯一的 BLOCKER** —— **✅ 2026-09-12 通过：产出物全部就位，维护者已逐条确认 `PROVENANCE.md` 的 8 文件表** |
 | G2 | 120 行 `load()` < 150 ms；400 行 < 400 ms；帧护栏无回退；截图确认视觉无变化 |
 | G3 | 公共 API 无宿主词汇；preset 可用；DocC 无未文档化 public symbol；Demo 控件数下降 |
@@ -673,6 +673,8 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | **发现并修复：Demo fixture 不符合 AMLL profile** | 四个 fixture 用行内相对 span 时间，而 AMLL/Apple Music 每层（div/p/span）都是绝对时间；库处理正确、示例错误，导致 Demo 画面几乎静止、永不高亮。四个 fixture 用合规绝对时间重写、歌词换成原创歌曲内容（commit `d1631ec`）。**这是审计漏掉的一项** —— 库正确而示例错误，示例却是第一印象 |
 | 2026-09-12 | **Gate 1B 通过：维护者逐条确认 `PROVENANCE.md`** | 维护者审阅并确认 8 文件派生清单与 `NOTICE` / `LICENSING.md` 一致。审计唯一的 BLOCKER 正式关闭。README「与 AMLL 的关系」段即为此确认的对外声明：部分代码基于 AMLL 参考与修改而来，同为 `AGPL-3.0-only` 开源，并向 AMLL 致谢 |
 | 2026-09-12 | **文档语言政策：一律中文** | 项目面向国内用户优先，以后所有文档与代码注释统一用中文撰写，英文后续再拓展。README 与 5 份 Documentation/ 文档已由维护者翻译为中文（commit `e2e8b6f`）；`NOTICE` 为法律文本，保持英文原样；代码注释从 Phase 0 起的新增内容即用中文（存量英文注释的转换另行安排） |
+| 2026-09-12 | **Phase 0 完成，G0 通过** | P0-1..P0-7 全部落地：`MelismaKitBench` 测量工程（五档与审计同量级）、39 条对抗解码用例、`Fixtures/` 可复现语料库（10 文件 + SHA256 清单）、Probe 扩展（`--load-timing`/`--scale`/p50..max）、CI 六步加固、`PERFORMANCE.md` 基线快照、`script/bench_gate.py` 性能门禁。`swift test` 150 全绿；本地 CI 等价序列全绿。**下一步：Phase 2（消灭装载阻塞）** |
+| 2026-09-12 | **P0-2 复现审计 HIGH：DOCTYPE 守卫不可达** | `TTMLDecoder.swift` 的 `hasDoctype` 依赖 `foundExternalEntityDeclarationWithName`，在 `shouldResolveExternalEntities=false` 下不触发 —— 四种 DOCTYPE 形态全部被静默接受。因外部实体不解析（`resolveExternalEntityName` 返回 nil），当前无实体注入面，但「拒绝 DOCTYPE」的意图未达成。测试已锁定现状契约（`DecoderRobustnessTests` 第 6 组），收紧守卫列入 **Phase 4** 加固清单 |
 
 ### 任务完成记录
 
@@ -694,3 +696,10 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | 1B | P1-15 README「与 AMLL 的关系」段 | `a957603` |
 | 2026-09-12 | — | 附：Demo fixture 改为合规绝对时间 + 原创歌词（审计漏项） | `d1631ec` |
 | 2026-09-12 | — | 附：README 与 Documentation 全部文档翻译为中文（维护者执行） | `e2e8b6f` |
+| 2026-09-12 | 0 | P0-1 测量工程（`MelismaKitBench` + `MelismaKitBenchCore`） | `9005352` |
+| 2026-09-12 | 0 | P0-2 对抗性解码测试（`DecoderRobustnessTests` 39 条） | `efcfe4b` |
+| 2026-09-12 | 0 | P0-3 可复现语料库（`Fixtures/` + `SHA256SUMS.txt` + `SyntheticCorpusTests`） | `9005352` |
+| 2026-09-12 | 0 | P0-4 Probe 扩展（`--load-timing` / `--scale` / p50..max / 默认真实规模） | `caa7793` |
+| 2026-09-12 | 0 | P0-5 CI 加固（Release + warnings-as-errors + Probe 冒烟） | `b46098c` |
+| 2026-09-12 | 0 | P0-6 基线快照（`Documentation/PERFORMANCE.md`） | `ac22af4` |
+| 2026-09-12 | 0 | P0-7 性能阈值门禁（`script/bench_gate.py` + CI 接线） | `b83cc95` |
