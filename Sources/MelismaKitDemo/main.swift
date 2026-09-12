@@ -10,10 +10,10 @@ import OSLog
         var title: String {
             switch self {
             case .library: return "Library song"
-            case .motion: return "Motion laboratory"
-            case .glow: return "Glow showcase"
-            case .duetRuby: return "Duet + Ruby"
-            case .chorus: return "Chorus / background"
+            case .motion: return "Lantern Street — word timing"
+            case .glow: return "Slow Fire — glow & emphasis"
+            case .duetRuby: return "星降る夜 — duet & ruby"
+            case .chorus: return "We Rise — background vocals"
             }
         }
         var resourceName: String {

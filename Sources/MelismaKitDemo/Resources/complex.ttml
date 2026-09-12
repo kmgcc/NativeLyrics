@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tt xmlns="http://www.w3.org/ns/ttml" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:tts="http://www.w3.org/ns/ttml#styling" xml:lang="en">
-  <head><metadata><ttm:title>MelismaKit — motion laboratory</ttm:title><ttm:agent xml:id="voiceA" type="person"/><ttm:agent xml:id="voiceB" type="person"/></metadata></head>
-  <body dur="70s"><div>
-    <p begin="5s" end="11s" ttm:agent="voiceA"><span begin="0s" end="1s">Watch </span><span begin="1s" end="2s">the </span><span begin="2s" end="6s">light</span><span ttm:role="x-translation" xml:lang="zh-Hans">看着光芒</span></p>
-    <p begin="10s" end="17s" ttm:agent="voiceB"><span begin="0s" end="1s">Across </span><span begin="1s" end="2s">the </span><span begin="2s" end="5s">sky </span><span begin="5s" end="7s">tonight</span><span ttm:role="x-bg" begin="2s" end="7s"><span begin="0s" end="2s">(the </span><span begin="2s" end="5s">sky)</span></span><span ttm:role="x-translation" xml:lang="zh-Hans">划过今晚的天空</span></p>
-    <p begin="18s" end="25s" ttm:agent="voiceA"><span begin="0s" end="3s" tts:ruby="container"><span tts:ruby="base">星空</span><span tts:ruby="text" begin="0s" end="1.5s">ほし</span><span tts:ruby="text" begin="1.5s" end="3s">ぞら</span></span><span begin="3s" end="4s">を</span><span begin="4s" end="7s">見上げて</span><span ttm:role="x-translation" xml:lang="zh-Hans">抬头仰望星空</span><span ttm:role="x-roman" xml:lang="ja-Latn">hoshizora o miagete</span></p>
-    <p begin="24s" end="30s" ttm:agent="voiceB"><span ttm:role="x-bg" begin="0s" end="6s"><span begin="0s" end="3s">(come </span><span begin="3s" end="6s">home)</span></span><span begin="2s" end="3s">We </span><span begin="3s" end="6s">belong</span><span ttm:role="x-translation">我们属于这里</span></p>
-    <p begin="36s" end="42s" ttm:agent="voiceA"><span begin="0s" end="1s">A </span><span begin="1s" end="2s">long </span><span begin="2s" end="3s">line </span><span begin="3s" end="4s">of </span><span begin="4s" end="6s">possibilities</span><span ttm:role="x-translation">很长的一行歌词，随着窗口大小连续重新排版。</span></p>
-    <p begin="43s" end="50s" ttm:agent="voiceA">普通逐行歌词 · Latin / CJK · 👩🏽‍🚀</p>
-    <p begin="49s" end="55s" ttm:agent="voiceB"><span begin="0s" end="2s">同时</span><span begin="2s" end="4s">歌唱</span><span begin="4s" end="6s">吧</span></p>
-    <p begin="61s" end="69s" ttm:agent="voiceA"><span begin="0s" end="2s">Carry </span><span begin="2s" end="3s">the </span><span begin="3s" end="8s">glow</span><span ttm:role="x-translation">让光芒继续</span></p>
-  </div></body>
+  <head><metadata><ttm:title>Lantern Street</ttm:title><ttm:agent xml:id="voiceA" type="person"/><ttm:agent xml:id="voiceB" type="person"/></metadata></head>
+  <body dur="70s">
+    <div begin="4s" end="32s" ttm:agent="voiceA">
+      <p begin="5s" end="11s" ttm:agent="voiceA"><span begin="5s" end="6.4s">Streetlights </span><span begin="6.4s" end="7.1s">hum </span><span begin="7.1s" end="8.8s">beneath </span><span begin="8.8s" end="9.3s">the </span><span begin="9.3s" end="11s">rain</span><span ttm:role="x-translation" xml:lang="zh-Hans">街灯在雨里低鸣</span></p>
+      <p begin="10.5s" end="17s" ttm:agent="voiceB"><span begin="11.4s" end="12.4s">Every </span><span begin="12.4s" end="13.6s">window </span><span begin="13.6s" end="14.4s">holds </span><span begin="14.4s" end="14.8s">a </span><span begin="14.8s" end="17s">name</span><span ttm:role="x-bg"><span begin="12.4s" end="14.6s">(a </span><span begin="14.6s" end="17s">name)</span></span><span ttm:role="x-translation" xml:lang="zh-Hans">每扇窗都留着一个名字</span></p>
+      <p begin="18s" end="25s" ttm:agent="voiceA"><span begin="18s" end="20.4s" tts:ruby="container"><span tts:ruby="base">夜風</span><span tts:ruby="text" begin="18s" end="19.2s">よ</span><span tts:ruby="text" begin="19.2s" end="20.4s">かぜ</span></span><span begin="20.4s" end="21.4s">に </span><span begin="21.4s" end="25s">揺れてる</span><span ttm:role="x-translation" xml:lang="zh-Hans">在夜风里轻轻摇晃</span><span ttm:role="x-roman" xml:lang="ja-Latn">yokaze ni yureteru</span></p>
+      <p begin="24s" end="30s" ttm:agent="voiceB"><span ttm:role="x-bg"><span begin="24s" end="27s">(hold </span><span begin="27s" end="30s">on)</span></span><span begin="26.4s" end="27.6s">We </span><span begin="27.6s" end="30s">belong</span><span ttm:role="x-translation" xml:lang="zh-Hans">我们属于这里</span></p>
+    </div>
+    <div begin="36s" end="56s" ttm:agent="voiceA">
+      <p begin="36s" end="42s" ttm:agent="voiceA"><span begin="36s" end="36.7s">And </span><span begin="36.7s" end="37.2s">the </span><span begin="37.2s" end="38s">long </span><span begin="38s" end="38.7s">road </span><span begin="38.7s" end="39.5s">home </span><span begin="39.5s" end="40.3s">keeps </span><span begin="40.3s" end="41.2s">folding </span><span begin="41.2s" end="42s">in</span><span ttm:role="x-translation" xml:lang="zh-Hans">回家的长路把我们说过的每一句话一次次折回来，直到窗口只剩下最后一盏还亮着的灯</span></p>
+      <p begin="43s" end="50s" ttm:agent="voiceA">街角の看板 · 霓虹 · 🌃</p>
+      <p begin="49s" end="55s" ttm:agent="voiceB"><span begin="49s" end="51.2s">いっしょに</span><span begin="51.2s" end="53.4s">歌おう</span><span begin="53.4s" end="55s">よ</span><span ttm:role="x-translation" xml:lang="zh-Hans">一起唱吧</span></p>
+    </div>
+    <div begin="61s" end="70s" ttm:agent="voiceA">
+      <p begin="61s" end="69s" ttm:agent="voiceA"><span begin="61s" end="62.6s">Carry </span><span begin="62.6s" end="63.4s">the </span><span begin="63.4s" end="69s">glow</span><span ttm:role="x-translation" xml:lang="zh-Hans">让光芒继续</span></p>
+    </div>
+  </body>
 </tt>

@@ -5,30 +5,34 @@
     xml:lang="ja">
   <head>
     <metadata>
-      <ttm:title>Duet &amp; Ruby — native lyric layers</ttm:title>
+      <ttm:title>星降る夜</ttm:title>
       <ttm:agent xml:id="a" type="person"/>
       <ttm:agent xml:id="b" type="person"/>
     </metadata>
   </head>
-  <body dur="42s"><div>
-    <p begin="0s" end="8s" ttm:agent="a">
-      <span begin="0s" end="2.2s" tts:ruby="container"><span tts:ruby="base">星空</span><span tts:ruby="text" begin="0s" end="1.1s">ほし</span><span tts:ruby="text" begin="1.1s" end="2.2s">ぞら</span></span>
-      <span begin="2.2s" end="4.2s">を </span><span begin="4.2s" end="8s">見上げて</span>
-      <span ttm:role="x-translation" xml:lang="zh-Hans">抬头仰望星空</span>
-    </p>
-    <p begin="7s" end="16s" ttm:agent="b">
-      <span begin="0s" end="2.2s">Across </span><span begin="2.2s" end="4.4s">the </span><span begin="4.4s" end="7s">sky</span>
-      <span ttm:role="x-bg" begin="1s" end="8.7s"><span begin="0s" end="2.2s">The </span><span begin="2.2s" end="4.4s">sky </span><span begin="4.4s" end="7.7s">answers</span></span>
-      <span ttm:role="x-translation" xml:lang="zh-Hans">划过今晚的天空</span>
-    </p>
-    <p begin="17s" end="26s" ttm:agent="a">
-      <span begin="0s" end="2.2s" tts:ruby="container"><span tts:ruby="base">光</span><span tts:ruby="text" begin="0s" end="2.2s">ひかり</span></span>
-      <span begin="2.2s" end="4.6s">の </span><span begin="4.6s" end="9s">中で</span>
-      <span ttm:role="x-translation" xml:lang="zh-Hans">在光芒之中</span>
-    </p>
-    <p begin="25s" end="36s" ttm:agent="b">
-      <span begin="0s" end="2.3s">Hold </span><span begin="2.3s" end="4.8s">on </span><span begin="4.8s" end="8s">to </span><span begin="8s" end="11s">me</span>
-      <span ttm:role="x-translation" xml:lang="zh-Hans">请紧紧抓住我</span>
-    </p>
-  </div></body>
+  <body dur="42s">
+    <div begin="0s" end="36s">
+      <p begin="0s" end="8s" ttm:agent="a">
+        <span begin="0s" end="2.2s" tts:ruby="container"><span tts:ruby="base">星空</span><span tts:ruby="text" begin="0s" end="1.1s">ほし</span><span tts:ruby="text" begin="1.1s" end="2.2s">ぞら</span></span>
+        <span begin="2.2s" end="4.4s">を </span><span begin="4.4s" end="8s">見上げて</span>
+        <span ttm:role="x-translation" xml:lang="zh-Hans">抬头仰望星空</span>
+        <span ttm:role="x-roman" xml:lang="ja-Latn">hoshizora o miagete</span>
+      </p>
+      <p begin="7s" end="16s" ttm:agent="b">
+        <span begin="7s" end="9.4s">Signals </span><span begin="9.4s" end="11.8s">drift </span><span begin="11.8s" end="16s">across the dark</span>
+        <span ttm:role="x-bg"><span begin="8.6s" end="11.2s">Signals </span><span begin="11.2s" end="13.4s">in the </span><span begin="13.4s" end="15.6s">dark</span></span>
+        <span ttm:role="x-translation" xml:lang="zh-Hans">信号划过夜空</span>
+      </p>
+      <p begin="17s" end="26s" ttm:agent="a">
+        <span begin="17s" end="20.4s" tts:ruby="container"><span tts:ruby="base">光</span><span tts:ruby="text" begin="17s" end="20.4s">ひかり</span></span>
+        <span begin="20.4s" end="22.4s">の </span><span begin="22.4s" end="26s">中で</span>
+        <span ttm:role="x-translation" xml:lang="zh-Hans">在光芒之中</span>
+        <span ttm:role="x-roman" xml:lang="ja-Latn">hikari no naka de</span>
+      </p>
+      <p begin="25s" end="36s" ttm:agent="b">
+        <span begin="25s" end="28.4s">Hold </span><span begin="28.4s" end="31.2s">on </span><span begin="31.2s" end="33.6s">to </span><span begin="33.6s" end="36s">me</span>
+        <span ttm:role="x-translation" xml:lang="zh-Hans">请紧紧抓住我</span>
+      </p>
+    </div>
+  </body>
 </tt>
