@@ -1,5 +1,7 @@
 # MelismaKit
 
+![MelismaKit rendering a duet: ruby, romanization, translations, and word-by-word highlight](Documentation/images/hero.png)
+
 `MelismaKit` is a native macOS lyric renderer built with AppKit, Core Text,
 Core Animation, and Core Image. It accepts AMLL-compatible TTML directly and
 keeps media timing in seconds; the host supplies playback state and remains the
@@ -117,6 +119,19 @@ Keep the `LyricsView` in the host's state/controller lifetime. SwiftUI may
 recreate the representable value, but the AppKit view remains the single source
 of truth for rendering and interaction.
 
+## Rendering features
+
+| | |
+|---|---|
+| ![Word-by-word highlight](Documentation/images/word-highlight.png) | ![Ruby above the base text](Documentation/images/ruby.png) |
+| Word-by-word karaoke highlight on the active row | Ruby (furigana) above the base text, with romanization and translation layers |
+| ![Interlude dots in a gap between lines](Documentation/images/interlude-dots.png) | ![Emphasis and glow on sustained syllables](Documentation/images/glow.png) |
+| Interlude dots while no line is being sung | Emphasis, glow, and blur driven by per-word timing |
+
+Every image is a deterministic render produced by `MelismaKitProbe` from the
+bundled fixtures, not a hand-taken screenshot. See
+[Demo and probe](#demo-and-probe) to regenerate them.
+
 ## Demo and probe
 
 Run the AppKit Demo from the repository root:
@@ -169,8 +184,31 @@ host does not need a compatibility orchestration layer.
 
 More detail is in [Documentation/INTEGRATION.md](Documentation/INTEGRATION.md).
 
+## Relationship to AMLL
+
+[AMLL (Apple Music-like Lyrics)](https://github.com/steve-xmh/applemusic-like-lyrics)
+is a web implementation: TypeScript, a DOM layer tree, and a browser rendering
+path. MelismaKit is a native implementation for macOS built on AppKit, Core
+Text, and Core Animation. **It is not an official Swift port of AMLL and is not
+affiliated with or endorsed by the AMLL project.**
+
+The two share a format, not a codebase. MelismaKit parses the same TTML profile,
+so a file that renders in AMLL renders here. Its timing, layout, motion, and
+interaction behavior were developed to match AMLL's observable behavior — and
+for a number of functions, by reading AMLL's source rather than its
+documentation. Those functions are derived works:
+
+- [`NOTICE`](NOTICE) records the AMLL attribution, the derived modules, and the
+  access date.
+- [`Documentation/PROVENANCE.md`](Documentation/PROVENANCE.md) lists, symbol by
+  symbol, which functions of each library source are derived, which are
+  independent, and which could not be determined.
+
+Both projects are licensed `AGPL-3.0-only`, so the licenses are compatible.
+
 ## License
 
 This project is distributed under the GNU Affero General Public License,
-version 3, only (`AGPL-3.0-only`). See [LICENSE](LICENSE) and
+version 3, only (`AGPL-3.0-only`). See [LICENSE](LICENSE),
+[NOTICE](NOTICE), and
 [Documentation/LICENSING.md](Documentation/LICENSING.md).
