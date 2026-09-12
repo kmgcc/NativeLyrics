@@ -1,5 +1,5 @@
 import AppKit
-import NativeLyrics
+import MelismaKit
 import ImageIO
 import UniformTypeIdentifiers
 
@@ -17,7 +17,7 @@ import UniformTypeIdentifiers
         }
         return
     }
-    guard args.count>=3 else { throw LyricsError.invalidTTML("Usage: LyricsProbe file.ttml output-directory [time=8] [width=760] [height=720]") }
+    guard args.count>=3 else { throw LyricsError.invalidTTML("Usage: MelismaKitProbe file.ttml output-directory [time=8] [width=760] [height=720]") }
     let url = URL(fileURLWithPath:args[1]), output = URL(fileURLWithPath:args[2],isDirectory:true)
     let time = args.count>3 ? Double(args[3]) ?? 8 : 8
     let width = args.count>4 ? Double(args[4]) ?? 760 : 760, height = args.count>5 ? Double(args[5]) ?? 720 : 720

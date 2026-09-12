@@ -1,6 +1,6 @@
 import AppKit
 import AVFoundation
-import NativeLyrics
+import MelismaKit
 import QuartzCore
 import OSLog
 
@@ -33,7 +33,7 @@ import OSLog
     private let play = NSButton(title:"Play",target:nil,action:nil)
     private let slider = NSSlider(value:0,minValue:0,maxValue:70,target:nil,action:nil)
     private let status = NSTextField(labelWithString:""), clockLabel = NSTextField(labelWithString:"0:00.0 / 1:10.0")
-    private let titleLabel = NSTextField(labelWithString:"Native Lyrics")
+    private let titleLabel = NSTextField(labelWithString:"MelismaKit")
     private var player: AVAudioPlayer?
     private var clock = LyricsClock()
     private var timer: Timer?
@@ -48,11 +48,11 @@ import OSLog
     private var librarySongs: [DemoLibrarySong] = []
     private var catalogTask: Task<Void, Never>?
     private var selectedSample: Sample = .motion
-    private let logger = Logger(subsystem:"org.example.NativeLyricsDemo",category:"demo")
+    private let logger = Logger(subsystem:"org.example.MelismaKitDemo",category:"demo")
     func applicationDidFinishLaunching(_ notification: Notification) {
         makeMenu()
         window = NSWindow(contentRect:NSRect(x:0,y:0,width:790,height:830),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
-        window.title = "Native Lyrics Demo"; window.minSize = NSSize(width:380,height:420); window.delegate = self
+        window.title = "MelismaKit Demo"; window.minSize = NSSize(width:380,height:420); window.delegate = self
         window.backgroundColor = NSColor(srgbRed:0.055,green:0.075,blue:0.12,alpha:1)
         window.appearance = NSAppearance(named:.darkAqua)
         let root = NSView(); window.contentView = root
@@ -151,7 +151,7 @@ import OSLog
     func windowWillClose(_ notification: Notification) { timer?.invalidate(); catalogTask?.cancel(); lyrics.releaseRenderingResources(); player?.stop() }
     private func makeMenu() {
         let menu = NSMenu(), app = NSMenuItem(); menu.addItem(app); let submenu = NSMenu(); app.submenu = submenu
-        submenu.addItem(withTitle:"Quit Native Lyrics Demo",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
+        submenu.addItem(withTitle:"Quit MelismaKit Demo",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
         let transport = NSMenuItem(); menu.addItem(transport); let actions = NSMenu(title:"Playback"); transport.submenu = actions
         let p = actions.addItem(withTitle:"Play / Pause",action:#selector(toggle),keyEquivalent:" "); p.target = self; p.keyEquivalentModifierMask = []
         let f = actions.addItem(withTitle:"Follow current lyrics",action:#selector(follow),keyEquivalent:"f"); f.target = self

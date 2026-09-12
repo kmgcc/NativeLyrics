@@ -1,5 +1,5 @@
 import XCTest
-@testable import NativeLyrics
+@testable import MelismaKit
 
 final class TimelineTests: XCTestCase {
     func testHalfOpenAndBufferedParallelRetention() {

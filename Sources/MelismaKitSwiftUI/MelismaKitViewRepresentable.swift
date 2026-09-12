@@ -1,5 +1,5 @@
 import AppKit
-import NativeLyrics
+import MelismaKit
 import SwiftUI
 
 /// The smallest SwiftUI bridge for the native lyric surface.
@@ -11,7 +11,7 @@ import SwiftUI
 /// AppKit view; it does not mirror renderer state or add an orchestration
 /// layer.
 @MainActor
-public struct NativeLyricsViewRepresentable: NSViewRepresentable {
+public struct MelismaKitViewRepresentable: NSViewRepresentable {
     public typealias NSViewType = LyricsView
 
     public let view: LyricsView

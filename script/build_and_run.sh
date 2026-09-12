@@ -15,26 +15,26 @@ done
 swift build --quiet -c "$build_configuration"
 binary_dir="$(swift build -c "$build_configuration" --show-bin-path)"
 dist_dir="$package_dir/dist"
-app="$dist_dir/Native Lyrics Demo.app"
+app="$dist_dir/MelismaKit Demo.app"
 mkdir -p "$dist_dir"
-stage_root="$(mktemp -d "${TMPDIR:-/tmp}/native-lyrics-demo.XXXXXX")"
-staged="$stage_root/Native Lyrics Demo.app"
+stage_root="$(mktemp -d "${TMPDIR:-/tmp}/melismakit-demo.XXXXXX")"
+staged="$stage_root/MelismaKit Demo.app"
 trap 'rm -rf "$stage_root"' EXIT
 if [[ -d "$app" ]]; then
   # Only stop this exact development executable, never a same-named player.
-  running_pid="$(pgrep -f "^${app}/Contents/MacOS/NativeLyricsDemo( |$)" || true)"
+  running_pid="$(pgrep -f "^${app}/Contents/MacOS/MelismaKitDemo( |$)" || true)"
   if [[ -n "$running_pid" ]]; then
     kill $running_pid
     for _ in {1..20}; do
-      pgrep -f "^${app}/Contents/MacOS/NativeLyricsDemo( |$)" >/dev/null || break
+      pgrep -f "^${app}/Contents/MacOS/MelismaKitDemo( |$)" >/dev/null || break
       sleep 0.05
     done
   fi
 fi
 mkdir -p "$staged/Contents/MacOS" "$staged/Contents/Resources"
-cp -X "$binary_dir/NativeLyricsDemo" "$staged/Contents/MacOS/"
+cp -X "$binary_dir/MelismaKitDemo" "$staged/Contents/MacOS/"
 cp -X "$package_dir/script/Info.plist" "$staged/Contents/Info.plist"
-for resource in "$package_dir/Sources/NativeLyricsDemo/Resources"/*.ttml; do
+for resource in "$package_dir/Sources/MelismaKitDemo/Resources"/*.ttml; do
   [[ ! -f "$resource" ]] || cp -X "$resource" "$staged/Contents/Resources/"
 done
 for bundle in "$binary_dir"/*.bundle; do [[ ! -d "$bundle" ]] || cp -RX "$bundle" "$staged/Contents/Resources/"; done
@@ -70,23 +70,23 @@ case "$mode" in
     /usr/bin/open -n "$app" --args "$@"
     ;;
   debug)
-    lldb -- "$app/Contents/MacOS/NativeLyricsDemo" "$@"
+    lldb -- "$app/Contents/MacOS/MelismaKitDemo" "$@"
     ;;
   logs)
     /usr/bin/open -n "$app" --args "$@"
-    /usr/bin/log stream --info --style compact --predicate 'process == "NativeLyricsDemo"'
+    /usr/bin/log stream --info --style compact --predicate 'process == "MelismaKitDemo"'
     ;;
   telemetry)
     /usr/bin/open -n "$app" --args "$@"
-    /usr/bin/log stream --info --style compact --predicate 'subsystem == "org.example.NativeLyricsDemo"'
+    /usr/bin/log stream --info --style compact --predicate 'subsystem == "org.example.MelismaKitDemo"'
     ;;
   verify)
     /usr/bin/open -n "$app" --args "$@"
     for _ in {1..20}; do
-      pgrep -f "^${app}/Contents/MacOS/NativeLyricsDemo( |$)" >/dev/null && break
+      pgrep -f "^${app}/Contents/MacOS/MelismaKitDemo( |$)" >/dev/null && break
       sleep 0.1
     done
-    pgrep -f "^${app}/Contents/MacOS/NativeLyricsDemo( |$)" >/dev/null
+    pgrep -f "^${app}/Contents/MacOS/MelismaKitDemo( |$)" >/dev/null
     ;;
   *)
     echo "usage: $0 [--release] [--build-only|--debug|--logs|--telemetry|--verify] [demo arguments]" >&2

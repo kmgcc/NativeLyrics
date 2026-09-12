@@ -1,6 +1,6 @@
 import AppKit
 import XCTest
-@testable import NativeLyrics
+@testable import MelismaKit
 
 final class LayoutTests: XCTestCase {
     func testFlatLRCLineIsNotTreatedAsKaraokeWordTiming() {

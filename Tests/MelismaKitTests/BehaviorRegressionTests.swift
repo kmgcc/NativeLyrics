@@ -1,6 +1,6 @@
 import AppKit
 import XCTest
-@testable import NativeLyrics
+@testable import MelismaKit
 
 final class BehaviorRegressionTests: XCTestCase {
     private let fixture = Data("<tt xmlns='http://www.w3.org/ns/ttml'><body><div><p begin='0s' end='3s'><span begin='0s' end='3s'>First</span></p><p begin='3s' end='6s'><span begin='3s' end='6s'>Second</span></p><p begin='6s' end='9s'><span begin='6s' end='9s'>Third</span></p><p begin='9s' end='12s'><span begin='9s' end='12s'>Fourth</span></p></div></body></tt>".utf8)

@@ -1,4 +1,4 @@
-# NativeLyrics validation
+# MelismaKit validation
 
 This document records checks for the standalone package. It deliberately
 separates package behavior from host-specific acceptance such as artwork
@@ -12,9 +12,9 @@ Run these commands from the repository root:
 swift package dump-package
 swift build --configuration debug
 swift test --configuration debug
-swift run --quiet LyricsProbe \
-  Sources/NativeLyricsDemo/Resources/complex.ttml \
-  /tmp/native-lyrics-probe 10 760 720 --paused
+swift run --quiet MelismaKitProbe \
+  Sources/MelismaKitDemo/Resources/complex.ttml \
+  /tmp/melismakit-probe 10 760 720 --paused
 bash script/build_and_run.sh --build-only
 ```
 
@@ -30,7 +30,7 @@ document as the existing synchronous decoder. `LyricsView.load(ttml:)` retains
 the original synchronous path; `install(document:)` shares the same renderer
 state transition after parsing.
 
-`LyricsProbe` uses a checked-in synthetic TTML fixture and reports frame count,
+`MelismaKitProbe` uses a checked-in synthetic TTML fixture and reports frame count,
 render percentile, and glyph-cache size. It is a deterministic smoke and
 regression tool, not a machine-independent performance claim.
 

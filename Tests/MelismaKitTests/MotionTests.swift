@@ -1,5 +1,5 @@
 import XCTest
-@testable import NativeLyrics
+@testable import MelismaKit
 
 final class MotionTests: XCTestCase {
     // Independent closed-form reference from AMLL's pushkine MIT solver, not the implementation.

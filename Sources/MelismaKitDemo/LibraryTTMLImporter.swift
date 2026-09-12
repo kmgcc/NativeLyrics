@@ -1,5 +1,5 @@
 import Foundation
-import NativeLyrics
+import MelismaKit
 
 /// The Demo passes the library's original AMLL TTML directly to the native
 /// decoder. The original bytes remain available for the renderer while the

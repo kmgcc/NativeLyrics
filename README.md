@@ -1,15 +1,15 @@
-# NativeLyrics
+# MelismaKit
 
-`NativeLyrics` is a native macOS lyric renderer built with AppKit, Core Text,
+`MelismaKit` is a native macOS lyric renderer built with AppKit, Core Text,
 Core Animation, and Core Image. It accepts AMLL-compatible TTML directly and
 keeps media timing in seconds; the host supplies playback state and remains the
 owner of the audio player.
 
 The package is split into two products:
 
-- `NativeLyrics` contains the renderer, TTML decoder, timeline, layout, motion,
+- `MelismaKit` contains the renderer, TTML decoder, timeline, layout, motion,
   interaction, and value models.
-- `NativeLyricsSwiftUI` contains one small `NSViewRepresentable` bridge. It
+- `MelismaKitSwiftUI` contains one small `NSViewRepresentable` bridge. It
   mounts a host-owned `LyricsView` and does not mirror renderer state or create
   a second controller hierarchy.
 
@@ -23,7 +23,7 @@ state; it does not patch layers or DOM details.
 
 - macOS 15 or later
 - Swift 6.1 toolchain or a newer compatible toolchain
-- AppKit for the renderer; SwiftUI is optional through `NativeLyricsSwiftUI`
+- AppKit for the renderer; SwiftUI is optional through `MelismaKitSwiftUI`
 
 ## Swift Package Manager
 
@@ -31,7 +31,7 @@ Add the package dependency:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/kmgcc/NativeLyrics.git", from: "0.1.4")
+    .package(url: "https://github.com/kmgcc/melismakit.git", from: "0.2.0")
 ]
 ```
 
@@ -39,8 +39,8 @@ Then link the products required by the target:
 
 ```swift
 dependencies: [
-    .product(name: "NativeLyrics", package: "NativeLyrics"),
-    .product(name: "NativeLyricsSwiftUI", package: "NativeLyrics")
+    .product(name: "MelismaKit", package: "MelismaKit"),
+    .product(name: "MelismaKitSwiftUI", package: "MelismaKit")
 ]
 ```
 
@@ -50,7 +50,7 @@ dependencies: [
 loads TTML bytes, sends playback samples, and handles lyric-click seeks:
 
 ```swift
-import NativeLyrics
+import MelismaKit
 
 @MainActor
 final class LyricsController {
@@ -100,15 +100,15 @@ func loadInBackground(_ data: Data, into view: LyricsView) async throws {
 The SwiftUI product intentionally keeps ownership explicit:
 
 ```swift
-import NativeLyrics
-import NativeLyricsSwiftUI
+import MelismaKit
+import MelismaKitSwiftUI
 import SwiftUI
 
 struct LyricsPanel: View {
     let lyricsView: LyricsView
 
     var body: some View {
-        NativeLyricsViewRepresentable(view: lyricsView)
+        MelismaKitViewRepresentable(view: lyricsView)
     }
 }
 ```
@@ -122,8 +122,8 @@ of truth for rendering and interaction.
 Run the AppKit Demo from the repository root:
 
 ```sh
-swift run --quiet NativeLyricsDemo
-swift run --quiet NativeLyricsDemo --ttml /path/to/lyrics.ttml
+swift run --quiet MelismaKitDemo
+swift run --quiet MelismaKitDemo --ttml /path/to/lyrics.ttml
 ```
 
 The Demo includes bundled TTML fixtures for word timing, line timing, glow,
@@ -132,7 +132,7 @@ panel. To inspect a directory-based catalog, pass one or more explicit roots;
 the Demo never reads an application-specific library registry:
 
 ```sh
-swift run --quiet NativeLyricsDemo --dump-catalog \
+swift run --quiet MelismaKitDemo --dump-catalog \
   --library-root /path/to/Library
 ```
 
@@ -143,14 +143,17 @@ directory, or a single directory containing `lyrics.ttml`. Adjacent
 For deterministic rendering measurements:
 
 ```sh
-swift run --quiet LyricsProbe \
-  Sources/NativeLyricsDemo/Resources/complex.ttml \
-  /tmp/native-lyrics-probe 10 760 720 --paused
+swift run --quiet MelismaKitProbe \
+  Sources/MelismaKitDemo/Resources/complex.ttml \
+  /tmp/melismakit-probe 10 760 720 --paused
 ```
 
 See [VALIDATION.md](VALIDATION.md) for the current test and manual-validation
 record, and [BEHAVIOR-REGRESSIONS.md](BEHAVIOR-REGRESSIONS.md) for the renderer
 contracts covered by regression tests.
+
+For where the project is going — and the phased plan for getting there — see
+[Documentation/ROADMAP.md](Documentation/ROADMAP.md).
 
 ## Architecture and compatibility
 

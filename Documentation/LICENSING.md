@@ -1,6 +1,6 @@
 # Licensing and provenance
 
-NativeLyrics is distributed under the GNU Affero General Public License,
+MelismaKit is distributed under the GNU Affero General Public License,
 version 3, only (`AGPL-3.0-only`). The complete license text is in
 [LICENSE](../LICENSE).
 

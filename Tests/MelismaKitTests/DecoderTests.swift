@@ -1,5 +1,5 @@
 import XCTest
-@testable import NativeLyrics
+@testable import MelismaKit
 
 final class DecoderTests: XCTestCase {
     func testStandardParentRelativeTiming() throws {

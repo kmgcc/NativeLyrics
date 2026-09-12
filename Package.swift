@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "NativeLyrics",
+    name: "MelismaKit",
     platforms: [.macOS(.v15)],
     products: [
-        .library(name: "NativeLyrics", targets: ["NativeLyrics"]),
-        .library(name: "NativeLyricsSwiftUI", targets: ["NativeLyricsSwiftUI"]),
-        .executable(name: "NativeLyricsDemo", targets: ["NativeLyricsDemo"]),
-        .executable(name: "LyricsProbe", targets: ["LyricsProbe"])
+        .library(name: "MelismaKit", targets: ["MelismaKit"]),
+        .library(name: "MelismaKitSwiftUI", targets: ["MelismaKitSwiftUI"]),
+        .executable(name: "MelismaKitDemo", targets: ["MelismaKitDemo"]),
+        .executable(name: "MelismaKitProbe", targets: ["MelismaKitProbe"])
     ],
     targets: [
-        .target(name: "NativeLyrics"),
-        .target(name: "NativeLyricsSwiftUI", dependencies: ["NativeLyrics"]),
-        .executableTarget(name: "NativeLyricsDemo", dependencies: ["NativeLyrics"], resources: [.copy("Resources")]),
-        .executableTarget(name: "LyricsProbe", dependencies: ["NativeLyrics"]),
-        .testTarget(name: "NativeLyricsTests", dependencies: ["NativeLyrics"], resources: [.copy("Fixtures")])
+        .target(name: "MelismaKit"),
+        .target(name: "MelismaKitSwiftUI", dependencies: ["MelismaKit"]),
+        .executableTarget(name: "MelismaKitDemo", dependencies: ["MelismaKit"], resources: [.copy("Resources")]),
+        .executableTarget(name: "MelismaKitProbe", dependencies: ["MelismaKit"]),
+        .testTarget(name: "MelismaKitTests", dependencies: ["MelismaKit"], resources: [.copy("Fixtures")])
     ],
     swiftLanguageModes: [.v5]
 )

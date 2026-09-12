@@ -1,4 +1,4 @@
-# Native lyrics behavior contracts — 2026-09-06
+# MelismaKit behavior contracts — 2026-09-06
 
 This records the native renderer's observable behavior contracts. The standalone
 package does not require a production WebView or a player application's source

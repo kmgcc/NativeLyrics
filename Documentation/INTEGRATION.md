@@ -1,6 +1,6 @@
 # Integration boundary
 
-`NativeLyrics` is a component, not a player framework. The renderer owns the
+`MelismaKit` is a component, not a player framework. The renderer owns the
 lyrics document after installation, layout, animation, hit testing, and all
 appearance decisions represented by `LyricsConfiguration`. The host owns the
 audio player, track selection, persistence, artwork acquisition, and the
@@ -8,7 +8,7 @@ decision about when to provide playback samples.
 
 ## Data flow
 
-| Concern | NativeLyrics | Host application |
+| Concern | MelismaKit | Host application |
 | --- | --- | --- |
 | TTML parsing and timing profile | Owns | Supplies source `Data` |
 | Document, line, word, Ruby, and translation values | Owns after decode/install | May inspect or retain values |
@@ -67,7 +67,7 @@ particular player.
 
 ## SwiftUI boundary
 
-`NativeLyricsSwiftUI.NativeLyricsViewRepresentable` is intentionally a thin
+`MelismaKitSwiftUI.MelismaKitViewRepresentable` is intentionally a thin
 `NSViewRepresentable`:
 
 ```swift
@@ -76,7 +76,7 @@ struct LyricsSurface: View {
     let view: LyricsView
 
     var body: some View {
-        NativeLyricsViewRepresentable(view: view)
+        MelismaKitViewRepresentable(view: view)
     }
 }
 ```
@@ -94,10 +94,10 @@ the repository root, a clean environment can run:
 swift package dump-package
 swift build --configuration debug
 swift test --configuration debug
-swift run --quiet NativeLyricsDemo
-swift run --quiet LyricsProbe \
-  Sources/NativeLyricsDemo/Resources/complex.ttml \
-  /tmp/native-lyrics-probe 10 760 720 --paused
+swift run --quiet MelismaKitDemo
+swift run --quiet MelismaKitProbe \
+  Sources/MelismaKitDemo/Resources/complex.ttml \
+  /tmp/melismakit-probe 10 760 720 --paused
 ```
 
 The Demo's optional catalog accepts only roots supplied through
