@@ -285,13 +285,13 @@ Host App
 | ID | 任务 | 细节 |
 |---|---|---|
 | `[x]` P1-1 | 确定名字 | **`MelismaKit`**（2026-09-12 定案，6/6 通过判定清单）。映射表见 1.4 | 
-| `[~]` P1-2 | 重命名 GitHub 仓库 | `kmgcc/NativeLyrics` → `kmgcc/melismakit`；GitHub 自动 redirect 旧 URL；更新本地 `git remote set-url`；**不动 tag 与历史** |
+| `[x]` P1-2 | 重命名 GitHub 仓库 | 2026-09-12 完成（`gh repo rename melismakit`）。旧 URL redirect 有效：`git ls-remote https://github.com/kmgcc/NativeLyrics.git HEAD` 正常返回，`gh repo view kmgcc/NativeLyrics` 解析到 `kmgcc/melismakit`。本地已 `git remote set-url origin https://github.com/kmgcc/melismakit.git`。**tag 与历史未动**（`0.1.0`–`0.1.4` 原样保留在远端）。附带补上了仓库描述与 10 个 topics |
 | `[x]` P1-3 | 重命名包与产品 | 2026-09-12 完成。`Package.swift` 全部改名；目录 `git mv` 保留历史（`Sources/NativeLyrics/`→`Sources/MelismaKit/`、`Sources/NativeLyricsSwiftUI/`→`Sources/MelismaKitSwiftUI/`、`Sources/NativeLyricsDemo/`→`Sources/MelismaKitDemo/`、`Sources/LyricsProbe/`→`Sources/MelismaKitProbe/`、`Tests/NativeLyricsTests/`→`Tests/MelismaKitTests/`） |
 | `[x]` P1-4 | 重命名 Swift 类型与文件 | 2026-09-12 完成。实际改名**只有一处**：`NativeLyricsViewRepresentable` → `MelismaKitViewRepresentable`（文件同步改名）。**保持原名的**：`LyricsView`、`LyricsConfiguration`、`LyricsDocument`、`LyricWord`、`TextLayoutEngine`、`TTMLDecoder`、`LyricsClock`、`LyricsTimeline`、`TimingPolicy` 等全部「歌词领域概念」类型 —— `Kit` 只出现在包与 module 上 |
 | `[x]` P1-5 | 更新所有引用 | 2026-09-12 完成。README、`Documentation/INTEGRATION.md`、`Documentation/LICENSING.md`、本文件、`VALIDATION.md`、`BEHAVIOR-REGRESSIONS.md`、Demo bundle id（`org.example.MelismaKitDemo`）、`script/Info.plist`、`script/build_and_run.sh`（含 `MelismaKit Demo.app`）、`.codex/environments/environment.toml` 全部改名。`.github/workflows/macos-ci.yml` 经检查**不含任何旧名**，无需改动。`script/Info.plist` 的 `CFBundleShortVersionString` 同步 `0.1`→`0.2`（改名是 breaking change，属 0.2 线） |
 | `[x]` P1-6 | tag 策略 | 2026-09-12 策略确认：旧 tag `0.1.x` 保留（**历史不可重写**）。新名从 `0.2.0` 起，用 **annotated** tag `v0.2.0`。注意 `0.1.4` 是 lightweight 而 `0.1.0`–`0.1.3` 是 annotated —— 新线一律 annotated。tag 本体在 P1-8 随发布创建 |
 | `[x]` P1-7 | 全仓旧名清零检查 | 2026-09-12 通过。`rg -i "nativelyrics\|native[ _-]lyrics"` 在**已跟踪文件**中只剩本文件的历史条目（第 2/9/10 节与 P1-2 任务描述本身）；其余全仓为零。`.codex/environments/environment.toml` **有意不改**：它被 gitignore，且其 `name` 字段跟随**本地检出目录名**，而目录名不在 1A 范围内（见执行记录） |
-| `[~]` P1-8 | 外部消费者验证 | 仓库外新建包，写 `.package(url: "https://github.com/kmgcc/melismakit.git", from: "0.2.0")`，`swift package resolve` + 编译 README 示例 |
+| `[x]` P1-8 | 外部消费者验证 | 2026-09-12 完成。仓库外新建消费者（`swift-tools-version: 6.1` → Swift 6 language mode），写 `.package(url: "https://github.com/kmgcc/melismakit.git", from: "0.2.0")` → 解析到 **`0.2.0` / revision `5665da5`**；`.product(name: "MelismaKit", package: "MelismaKit")` 与 `MelismaKitSwiftUI` 均链接成功；README 与 INTEGRATION 的全部示例代码编译通过、**零警告**、可运行。annotated tag `v0.2.0` 已推送。<br>**注意一个易错点**：URL 推导出的 package identity 是小写 `melismakit`，而 `.product(package:)` 里写的是 `MelismaKit` —— SwiftPM 对 identity 做大小写不敏感匹配，实测可用；README 的写法不用改 |
 
 **1A 执行记录（2026-09-12）**
 
@@ -307,7 +307,10 @@ Host App
 | Demo 无头路径 | `--dump-import` 输出 `title=MelismaKit — motion laboratory`；`--dump-catalog` 正常 |
 | Demo App 包 | `script/build_and_run.sh --build-only` → `dist/MelismaKit Demo.app`，`codesign --verify --deep --strict` 通过 |
 | Demo 启动 | `--verify` 启动成功、存活 2 s 无崩溃、正常退出 |
-| 仍未完成 | **P1-2**（GitHub 远端改名）与 **P1-8**（外部消费者解析 `v0.2.0`）—— 两者都需要 `git push`，待维护者授权。另：**本地检出目录仍叫 `NativeLyrics/`**（不在 git 管辖内，也不在 1A 任务范围内）；改名会打断正在使用该路径的编辑器与工具，建议由维护者在确认无进程占用后手动 `mv`，并同步 `.codex/environments/environment.toml` 的 `name` 字段 |
+| 远端改名（P1-2） | 完成。`kmgcc/NativeLyrics` → `kmgcc/melismakit`；旧 URL redirect 实测有效；`0.1.x` tag 与历史未动 |
+| 外部消费者（P1-8） | 完成。`from: "0.2.0"` → revision `5665da5`；README/INTEGRATION 全部示例在 Swift 6 mode 下零警告编译并运行 |
+| 全新 clone 复验 | 完成。`git clone` 到仓库外 → `dump-package` / Debug / Release（均零警告）/ `swift test` 99 全绿 / Probe / Demo 无头路径全部正常 |
+| 本地检出目录 | **仍叫 `NativeLyrics/`** —— 不在 git 管辖内，也不在 1A 任务范围内。改名会打断正在使用该路径的编辑器与工具，建议由维护者在确认无进程占用后手动 `mv`，并同步 `.codex/environments/environment.toml` 的 `name` 字段 |
 
 **Gate 1A**：`git grep` 旧名仅剩历史记录；全新 clone 后 `swift build`（Debug + Release，零警告）/ `swift test` / 跑 Demo / 跑 Probe 全部正常；外部消费者能从新 URL 解析 `v0.2.0`；GitHub 旧仓名 redirect 生效。
 
@@ -537,7 +540,7 @@ Host App
 
 | Gate | 条件 |
 |---|---|
-| **G1A** | 改名完成（`MelismaKit`）且 `git grep` 旧名仅剩历史记录；全新 clone 后 Debug+Release 构建零警告 / 测试 / Demo / Probe 全部正常；外部消费者能从新 URL 解析 `v0.2.0`；GitHub 旧仓名 redirect 生效 |
+| **G1A** | 改名完成（`MelismaKit`）且 `git grep` 旧名仅剩历史记录；全新 clone 后 Debug+Release 构建零警告 / 测试 / Demo / Probe 全部正常；外部消费者能从新 URL 解析 `v0.2.0`；GitHub 旧仓名 redirect 生效 —— **✅ 2026-09-12 全部通过** |
 | **G0** | 性能基线可复现；CI 有 Release + Probe + warnings-as-errors；对抗用例进测试 |
 | **G1B** | 派生清单覆盖全部源文件；`NOTICE` + `LICENSING.md` 与清单一致；派生文件头有声明；README 有「与 AMLL 的关系」段与截图。**达成即清掉审计唯一的 BLOCKER** |
 | G2 | 120 行 `load()` < 150 ms；400 行 < 400 ms；帧护栏无回退；截图确认视觉无变化 |
@@ -599,7 +602,7 @@ Host App
 
 | # | 事项 | 阻塞 | 状态 |
 |---|---|---|---|
-| D-1 | ~~项目名称~~ | ~~阻塞 Phase 1A~~ | **已决定：`MelismaKit`（2026-09-12）**。P1-1 与 **P1-3..P1-7 已完成**（本地改名全部落地并验证）；**P1-2**（GitHub 远端改名）与 **P1-8**（外部消费者解析 `v0.2.0`）待执行，均需推送授权 |
+| D-1 | ~~项目名称~~ | ~~阻塞 Phase 1A~~ | **已完成**：取名 `MelismaKit`（2026-09-12）并**执行完毕 Phase 1A 全部 P1-1..P1-8**，G1A 于 2026-09-12 通过。命名到此冻结，不再改 |
 | D-2 | Phase 2 是否做分批首次装载（P2-5） | 阻塞 P2-5/P2-6 | 待 P2-1..P2-4 实测后决定 |
 | D-3 | RTL：实现还是仅文档化（P5-9） | 阻塞 P5-9 | 待 Phase 5 开始时定 |
 | D-4 | 是否支持 iOS（P6-16/17） | 阻塞 Phase 6D | 待 Phase 6 开始时定 |
@@ -649,7 +652,7 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | `MeloLyrics` 加入候选并完成实测 | 全串命名空间第一梯队（同名仓库 3、npm/PyPI 空闲、`.dev`/`.app` 可用、`.com` 仅空占位）；可读性/可发现性全候选最高。代价：「Melo」在音乐 App 赛道拥挤（多个 App Store Music 分类 App + `MeloTTS` 7.6k★），会影响到 P6-4 的品牌化预览 App。详见 1.4 综合对比表 |
 | 2026-09-12 | **命名定案：`MelismaKit`** | P1-1 完成。仓库 `melismakit`、module `MelismaKit`、产品 `MelismaKit` / `MelismaKitSwiftUI` / `MelismaKitDemo` / `MelismaKitProbe`；**类型名不加前缀**。改名执行排在 **Phase 1A 且推荐作为第一个执行步骤**（先改名再建 Phase 0 的测量工件，避免二次改名）。其余候选转入历史记录 |
 | 2026-09-12 | **计划顺序调整** | Phase 1 拆为 1A（改名）/ 1B（provenance）两个独立阶段；推荐执行顺序 `1A → 0 → 1B → 2 → 3 → …`。Gate 相应拆为 G1A / G0 / G1B |
-| 2026-09-12 | **Phase 1A 改名执行**（P1-3..P1-7 完成） | 包名/产品/target/目录/类型/文档/脚本/CI 全部改为 `MelismaKit`；目录用 `git mv` 保留历史；类型名只改 `MelismaKitViewRepresentable` 一处。验证：Debug+Release 零警告、`swift test` 99 全绿、Probe p95 1.33 ms（基线 1.195，无回退）、Demo 包与启动均正常。**未提交远端**：P1-2 与 P1-8 待维护者授权推送 |
+| 2026-09-12 | **Phase 1A 改名执行完毕，G1A 通过** | P1-1..P1-8 全部完成。本地：包名/产品/target/目录/类型/文档/脚本全部改为 `MelismaKit`，目录用 `git mv` 保留历史，类型名只改 `MelismaKitViewRepresentable` 一处（commit `e90ca7b`）。远端：仓库 `kmgcc/NativeLyrics` → `kmgcc/melismakit`，旧 URL redirect 有效，annotated tag `v0.2.0` 已推送，`0.1.x` tag 与历史未动。验证：Debug+Release 零警告、`swift test` 99 全绿、Probe p95 1.33 ms（基线 1.195，无回退）、Demo 包与启动正常、全新 clone 复验通过、外部消费者 `from: "0.2.0"` 解析到 revision `5665da5` 且 README 示例零警告可运行。**下一步：Phase 0** |
 
 ### 任务完成记录
 
@@ -660,4 +663,5 @@ python3 script/summarize_profile.py <trace.xml>   # CA::Transaction::commit / Fi
 | 2026-09-12 | 1A | P1-5 全部引用改名（README / Documentation / VALIDATION / BEHAVIOR-REGRESSIONS / script / bundle id） | `e90ca7b` |
 | 2026-09-12 | 1A | P1-6 tag 策略确认（`v0.2.0` annotated） | `e90ca7b` |
 | 2026-09-12 | 1A | P1-7 全仓旧名清零检查通过 | `e90ca7b` |
-| — | 1A | P1-2 远端改名 / P1-8 外部消费者 —— **待推送授权** | — |
+| 2026-09-12 | 1A | P1-2 GitHub 仓库改名 `kmgcc/NativeLyrics` → `kmgcc/melismakit` | `5793004` |
+| 2026-09-12 | 1A | P1-8 外部消费者 `from: "0.2.0"` 解析 + README 示例编译通过 | `5793004` |
