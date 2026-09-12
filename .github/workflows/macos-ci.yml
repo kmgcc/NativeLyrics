@@ -22,3 +22,7 @@ jobs:
         run: swift run --quiet MelismaKitProbe --scale 120 --paused /tmp/melismakit-probe-ci 10 760 720
       - name: Verify fixture corpus integrity
         run: swift run --quiet MelismaKitBench --verify-fixtures
+      - name: Performance gate (Phase 0 thresholds)
+        run: |
+          swift run -c release --quiet MelismaKitBench --scale 120 --json > /tmp/melismakit-bench.json
+          python3 script/bench_gate.py /tmp/melismakit-bench.json
